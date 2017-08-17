@@ -94,13 +94,17 @@ function mostrarMapa(posicion){
 }
 
 function mostrar(posicion){
+    
     if (!bContaIni){
         horIni= new Date();
         objPositionIni=posicion;
         $("#horIni").text("Hora Inicio : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());        
         bContaIni = true;
-        aLat.push(objPositionIni.coords.latitude);
-        aLon.push(objPositionIni.coords.longitude);
+        losMetros=parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionIni.coords.latitude),parseFloat(objPositionIni.coords.longitude);
+        if (losMetros>1) {
+            aLat.push(objPositionIni.coords.latitude);
+            aLon.push(objPositionIni.coords.longitude);
+        }
         //aLat.push("4.59488357");
         //aLon.push("-74.15688198");
     }
@@ -108,13 +112,16 @@ function mostrar(posicion){
         horAct = new Date();
         objPositionAct=posicion;
         $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
-        aLat.push(objPositionAct.coords.latitude);
-        aLon.push(objPositionAct.coords.longitude);
+        losMetros=parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionIni.coords.latitude),parseFloat(objPositionIni.coords.longitude);
+        if (losMetros>1) {
+            aLat.push(objPositionAct.coords.latitude);
+            aLon.push(objPositionAct.coords.longitude);
+        }
         $("#timRec").text(restarFechasEnSegs( horIni, horAct)+" segs");    //$("#geolocation").text("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
         //$("#timRec").text(toString());
         mostrarPosiciones();
         if (tieneInternetSN() && $("verMapa").val()==="verMapa"){
-        mostrarMapa(posicion);
+            mostrarMapa(posicion);
         }
         //$("#txtDato").value("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
     }
