@@ -140,7 +140,7 @@ function mostrar(posicion){
         horAct = new Date();
         objPositionAct=posicion;
         $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
-        losMetros=parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude);
+        losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
         if (losMetros>metMinRegPos) {
             objPosicionAnt=objPositionAct;
             aLat.push(objPositionAct.coords.latitude);
