@@ -16,7 +16,7 @@ h2 {
 .textoGrandeOscuro{
     font-size:30px;
     color: #008aaa;
-    position: absolute;
+    /*position: absolute;*/
     margin-left: 20px;
     height: 100px;
 }
