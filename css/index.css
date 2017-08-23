@@ -15,10 +15,10 @@ h2 {
 
 .textoGrandeOscuro{
     font-size:15px;
-    color: #008aaa;
+    color: #005599;
     /*position: absolute;*/
-    margin-left: 20px;
-    height: 100px;
+    margin: 5px;
+    /*height: 100px;*/
 }
 .textoGrandeClaro{
     font-size:30px;
