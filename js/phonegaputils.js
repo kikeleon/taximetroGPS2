@@ -49,7 +49,7 @@ function resetearValores(){
     iSegs = 0;
     lMovido=false;//controla movimientos de carro;
     metrosCada100=0;
-    Unidades=0;
+    Unidades=23;
 }
 function get_loc() {
     if (navigator.geolocation) {
