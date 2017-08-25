@@ -16,7 +16,7 @@ var bContaIni = false;
 var fsumador=0;
 var ftemp=0;
 var nomArchivoTexto="prueba.txt";
-var metMinRegPos=10;//metros minimos para registro de cambio de posicion
+var metMinRegPos=2;//metros minimos para registro de cambio de posicion
 var Unidades =0;//cada 100mts o 23 segs
 var segsSinMov=0;// para llevar el tiempo sin movimiento, se suma una unidad
 var Banderazo=28;//al iniciar
@@ -28,8 +28,24 @@ var aFest = ["1;9","3;20","4;13","4;14","5;1","5,29","6;19","6;26","7;3","7;20",
 var iSegs = 0;
 var lMovido=false;//controla movimientos de carro;
 var metrosCada100=0;
+var ventana_ancho=0;
+var ventana_alto=0;
+var valorUnidad=83;
 
-
+function resetearValores(){
+    bContaIni=false;
+    aLat.length=0;
+    aLon.length=0;
+    millisegsIni=0;
+    millisegsAct =0;
+    bContaIni = false;
+    fsumador=0;
+    ftemp=0;
+    segsSinMov=0;// para llevar el tiempo sin movimiento, se suma una unidad
+    iSegs = 0;
+    lMovido=false;//controla movimientos de carro;
+    metrosCada100=0;
+}
 function get_loc() {
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(coordenadas);
@@ -76,8 +92,12 @@ function obtener(){
     //navigator.geolocation.getCurrentPosition(mostrar,manejoErfileApi
     //ror);
     //
-    
+    $("#btnComenzar").buttonMarkup({theme: 'a'});
+    $("#btnComenzar").text("Recomenzar");
     horIni= new Date();
+    horAct= new Date();
+    aLat.length=0;
+    aLon.length=0;
     $("#geolocation").text("obteniendo direccion...");
     var options = { timeout: 30000, enableHighAccuracy: true };
     $("#horAct").text("Hora Actual : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());
@@ -96,6 +116,7 @@ function cuentaSegs(){
             Unidades+=1;
             lMovido=false;
             iSegs=0;
+            mostrarPosiciones();
         }
     }
 }
@@ -121,10 +142,11 @@ function mostrarMapa(posicion){
 }
 
 function mostrar(posicion){
-    
+    //esto no ha actualizado
     if (!bContaIni){
         horIni= new Date();
         objPositionAnt=posicion;
+        objPositionAct=posicion;
         objPositionIni=posicion;
         $("#horIni").text("Hora Inicio : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());        
         bContaIni = true;
@@ -133,11 +155,12 @@ function mostrar(posicion){
             aLat.push(objPositionIni.coords.latitude);
             aLon.push(objPositionIni.coords.longitude);
         }
-        //aLat.push("4.59488357");
-        //aLon.push("-74.15688198");
+
+        
     }
     else{
         horAct = new Date();
+        objPositionAnt=objPositionAct;
         objPositionAct=posicion;
         $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
         losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
@@ -210,17 +233,33 @@ function restarFechasEnSegs(hini,hfin){
      $("#latlonAct").text("Actual en : " + objPositionAct.coords.latitude + " , " + objPositionAct.coords.longitude);
      //$("#disRec").text("Distancia recorrido : " + calcularDistanciaTotal().toString());
      eldato= calcularDistanciaTotalEnMetros();
-     $("#disRec").text("Distancia recorrido " + eldato.toString() +"mts");
+     $("#disRec").text( eldato.toString() +"mts");
      $("#unidades").text(Unidades.toString());
-     $("#valor").text("$"+(eldato*1000).toString());
+     eldato= calcularValorPorUnidades();
+     $("#valor").text("$"+eldato.toString());
      
      eldato=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionIni.coords.latitude),parseFloat(objPositionIni.coords.longitude));
      $("#disRecUlt").text("Ultima Distancia recorrido : " + eldato.toString() + "mts");
      
      
      $("#listening").text("se va a escribir");
-     escribir();
+     //escribir();
   }
+ 
+ function calcularValorPorUnidades(){
+     var retVal=0;
+     horAct = new Date();
+     if (Unidades<50) retVal=4100;
+     else{
+        retVal=Unidades*valorUnidad;
+        if (horAct.getHours()>20) retVal+=recNoct;
+     } 
+         
+     
+     //FALTA EL CALCULO DE FESTIVOS
+     
+     return retVal;
+ }
  
  function calcularDistanciaTotalEnMetros(){
      
@@ -229,7 +268,7 @@ function restarFechasEnSegs(hini,hfin){
      for (i = 1; i < aLat.length; i++) {
          fsumador = fsumador + parseFloat(getMetros(parseFloat(aLat[i-1]),parseFloat(aLon[i-1]),parseFloat(aLat[i]),parseFloat(aLon[i])));
      }
-     return fsumador;
+     return parseFloat(fsumador.toFixed(1));
      
  }
 
@@ -253,7 +292,7 @@ function getMetros(lat1,lon1,lat2,lon2){
     var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(rads(lat1)) * Math.cos(rads(lat2)) * Math.sin(dLong/2) * Math.sin(dLong/2);
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     var d = R * c;
-    return d.toFixed(3); //Retorna tres decimales
+    return parseFloat(d.toFixed(3)); //Retorna tres decimales
     //return R;
 }
 
