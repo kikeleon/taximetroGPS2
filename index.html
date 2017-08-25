@@ -21,8 +21,9 @@
 -->
 <html>
 
-<head>
+<head data-noxhrfix>
     <title>taximetro GPS</title>
+
     <meta charset="utf-8" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="msapplication-tap-highlight" content="no" />
@@ -47,9 +48,9 @@
     <link rel="stylesheet" href="css/jquery.mobile.icons.min.css" />
     <link rel="stylesheet" href="css/jquery.mobile.structure-1.4.5.min.css"/>
     <link rel="stylesheet" href="css/index.css"/> 
-    <script src="js/jquery-1.11.1.min.js"></script>
-    <script src="js/jquery.mobile-1.4.5.min.js"></script> 
-    <script src="js/phonegaputils.js"></script>
+    <script src="./js/jquery-1.11.1.min.js"></script>
+    <script src="/js/jquery.mobile-1.4.5.min.js"></script> 
+    <script src="/js/phonegaputils.js"></script>
 
     <script>
 
@@ -60,10 +61,16 @@
 </head>
 
 <body>
+    <script>
+        $(document).ready(function($){
+            ventana_ancho = $(window).width();
+            ventana_alto = $(window).height();
+        }); 
+    </script>
     <div class="app">
         <div data-role="page" data-theme="b">
             <div id="encabezado" data-role="header" data-position="fixed" >
-                <a href="javascript:obtener();" class="ui-btn ui-corner-all ui-shadow ui-icon-home ui-btn-icon-left">Comenzar</a>
+                <a href="javascript:obtener();" class="ui-btn ui-corner-all ui-shadow ui-icon-home ui-btn-icon-left" id="btnComenzar">Comenzar</a>
                 <h1>espaciointernet spectrum</h1>
                 <a href="javascript:mostrarMapa();" class="ui-btn ui-corner-all ui-shadow ui-icon-search ui-btn-icon-left">Ver Mapa</a>
             </div>
@@ -93,7 +100,7 @@
                 <div class="ui-grid-c">
                     <div class="ui-block-a">
                     <a href="#" class="ui-btn ui-corner-all ui-shadow">TARIFA</a><br>
-                    <span id="tarifa" class="textoGrandeOscuro">$1000</span>
+                    <span id="tarifa" class="textoGrandeOscuro">$83</span>
                     </div>
                     <div class="ui-block-b">
                     <a href="#" class="ui-btn ui-corner-all ui-shadow">RECORRIDO</a><br>
