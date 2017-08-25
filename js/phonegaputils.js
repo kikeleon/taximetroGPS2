@@ -33,7 +33,11 @@ var ventana_alto=0;
 var valorUnidad=83;
 
 function resetearValores(){
+    ventana_ancho = $(window).width();
+    ventana_alto = $(window).height();
     bContaIni=false;
+    horIni= new Date();
+    horAct= new Date();
     aLat.length=0;
     aLon.length=0;
     millisegsIni=0;
@@ -45,6 +49,7 @@ function resetearValores(){
     iSegs = 0;
     lMovido=false;//controla movimientos de carro;
     metrosCada100=0;
+    Unidades=0;
 }
 function get_loc() {
     if (navigator.geolocation) {
@@ -94,10 +99,8 @@ function obtener(){
     //
     $("#btnComenzar").buttonMarkup({theme: 'a'});
     $("#btnComenzar").text("Recomenzar");
-    horIni= new Date();
-    horAct= new Date();
-    aLat.length=0;
-    aLon.length=0;
+    resetearValores();
+
     $("#geolocation").text("obteniendo direccion...");
     var options = { timeout: 30000, enableHighAccuracy: true };
     $("#horAct").text("Hora Actual : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());
