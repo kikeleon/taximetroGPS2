@@ -128,7 +128,7 @@ function mostrarMapa(posicion){
         // SE TOMA EL VALOR ACTUAL DE LA POSICION 
         mapurl='http://maps.google.com/maps/api/staticmap?center='+
         objPositionAct.coords.latitude+','+objPositionAct.coords.longitude+
-        '&zoom=12&size=200x200&sensor=false&markers='+objPositionAct.coords.latitude+
+        '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+objPositionAct.coords.latitude+
         ','+objPositionAct.coords.longitude;
     }
     else{
