@@ -134,7 +134,7 @@ function mostrarMapa(posicion){
     else{
         mapurl='http://maps.google.com/maps/api/staticmap?center='+
         posicion.coords.latitude+','+posicion.coords.longitude+
-        '&zoom=12&size=200x200&sensor=false&markers='+posicion.coords.latitude+
+        '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+posicion.coords.latitude+
         ','+posicion.coords.longitude;
         
     }
