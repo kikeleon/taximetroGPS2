@@ -1,0 +1,26 @@
+
+p {
+    margin: 10px;
+    color:cadetblue;
+}
+
+h1 {
+    margin: 20px;
+    color: #005599;
+}
+h2 {
+    margin: 20px;
+    align-content: flex-start;
+}
+
+.textoGrandeOscuro{
+    font-size:15px;
+    color: #005599;
+    /*position: absolute;*/
+    margin: 5px;
+    /*height: 100px;*/
+}
+.textoGrandeClaro{
+    font-size:30px;
+    color: #00caf2;
+}
