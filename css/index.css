@@ -17,9 +17,11 @@ h2 {
     font-size:15px;
     color: #005599;
     /*position: absolute;*/
-    margin: 5px;
+    margin-left: 50px;
     /*height: 100px;*/
+    text-align: right;
 }
+        
 .textoGrandeClaro{
     font-size:30px;
     color: #00caf2;
