@@ -102,7 +102,7 @@ function obtener(){
     resetearValores();
 
     $("#geolocation").text("obteniendo direccion...");
-    var options = { timeout: 30000, enableHighAccuracy: true };
+    var options = {maximumAge: 20000, timeout: 30000, enableHighAccuracy: true };
     $("#horAct").text("Hora Actual : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());
     //alert(horIni.toString());
     //$("#horIni").text(horIni.toString());
@@ -146,6 +146,7 @@ function mostrarMapa(posicion){
 
 function mostrar(posicion){
     //esto no ha actualizado
+    
     if (!bContaIni){
         horIni= new Date();
         objPositionAnt=posicion;
@@ -156,8 +157,7 @@ function mostrar(posicion){
         losMetros=parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionIni.coords.latitude),parseFloat(objPositionIni.coords.longitude);
         aLat.push(objPositionIni.coords.latitude);
         aLon.push(objPositionIni.coords.longitude);
-
-        
+       
     }
     else{
         horAct = new Date();
@@ -199,7 +199,7 @@ function restarFechasEnSegs(hini,hfin){
 
  function manejoError(error){
     var errortmp="";
-    errortmp = 'code: '  + error.code + '\n' +'message: ' + error.message + '\n';
+    errortmp = 'error geolocaliza code: '  + error.code + 'message: ' + error.message ;
      $("#geolocation").text(errortmp);
  }
 
@@ -239,9 +239,9 @@ function restarFechasEnSegs(hini,hfin){
      eldato= calcularValorPorUnidades();
      $("#valor").text("$"+eldato.toString());
      
-     eldato=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionIni.coords.latitude),parseFloat(objPositionIni.coords.longitude));
+     eldato=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
      $("#disRecUlt").text("Ultima Distancia recorrido : " + eldato.toString() + "mts");
-     
+     $("#geolocation").text("Exactitud en medida " + objPositionAct.coords.accuracy);
      
      $("#listening").text("se va a escribir");
      //escribir();
