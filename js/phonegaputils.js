@@ -16,7 +16,7 @@ var bContaIni = false;
 var fsumador=0;
 var ftemp=0;
 var nomArchivoTexto="prueba.txt";
-var metMinRegPos=5;//metros minimos para registro de cambio de posicion
+var metMinRegPos=10;//metros minimos para registro de cambio de posicion
 var Unidades =0;//cada 100mts o 23 segs
 var segsSinMov=0;// para llevar el tiempo sin movimiento, se suma una unidad
 var Banderazo=28;//al iniciar
@@ -146,46 +146,47 @@ function mostrarMapa(posicion){
 
 function mostrar(posicion){
     //esto no ha actualizado
-    
-    if (!bContaIni){
-        horIni= new Date();
-        objPositionAnt=posicion;
-        objPositionAct=posicion;
-        objPositionIni=posicion;
-        $("#horIni").text("Hora Inicio : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());        
-        bContaIni = true;
-        losMetros=parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionIni.coords.latitude),parseFloat(objPositionIni.coords.longitude);
-        aLat.push(objPositionIni.coords.latitude);
-        aLon.push(objPositionIni.coords.longitude);
-       
-    }
-    else{
-        horAct = new Date();
-        objPositionAnt=objPositionAct;
-        objPositionAct=posicion;
-        $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
-        losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
-        if (losMetros>metMinRegPos) {
-            objPosicionAnt=objPositionAct;
-            aLat.push(objPositionAct.coords.latitude);
-            aLon.push(objPositionAct.coords.longitude);
-            if (metrosCada100>=100){
-                metrosCada100-=100;
-                Unidades+=1;
-            }
-            else{
-                metrosCada100+=losMetros;
-            }
+    if (posicion.coords.accuracy<metMinRegPos){
+        if (!bContaIni){
+            horIni= new Date();
+            objPositionAnt=posicion;
+            objPositionAct=posicion;
+            objPositionIni=posicion;
+            $("#horIni").text("Hora Inicio : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());        
+            bContaIni = true;
+            losMetros=parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionIni.coords.latitude),parseFloat(objPositionIni.coords.longitude);
+            aLat.push(objPositionIni.coords.latitude);
+            aLon.push(objPositionIni.coords.longitude);
         }
-        
-        $("#timRec").text(restarFechasEnSegs( horIni, horAct)+" segs");    //$("#geolocation").text("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
-        //$("#timRec").text(toString());
-        mostrarPosiciones();
-        if (tieneInternetSN() && $("verMapa").val()==="verMapa"){
-            mostrarMapa(posicion);
-        }
+        else{
+            horAct = new Date();
+            objPositionAnt=objPositionAct;
+            objPositionAct=posicion;
+            $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
+            losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
+            if (losMetros>metMinRegPos) {
+                objPosicionAnt=objPositionAct;
+                aLat.push(objPositionAct.coords.latitude);
+                aLon.push(objPositionAct.coords.longitude);
+                if (metrosCada100>=100){
+                    metrosCada100-=100;
+                    Unidades+=1;
+                }
+                else{
+                    metrosCada100+=losMetros;
+                }
+            }
+
+            $("#timRec").text(restarFechasEnSegs( horIni, horAct)+" segs");    //$("#geolocation").text("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
+            //$("#timRec").text(toString());
+            mostrarPosiciones();
+            if (tieneInternetSN() && $("verMapa").val()==="verMapa"){
+                mostrarMapa(posicion);
+            }
         //$("#txtDato").value("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
+        }
     }
+
 
 
     
