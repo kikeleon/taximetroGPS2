@@ -16,7 +16,7 @@ var bContaIni = false;
 var fsumador=0;
 var ftemp=0;
 var nomArchivoTexto="prueba.txt";
-var metMinRegPos=10;//metros minimos para registro de cambio de posicion
+var metMinRegPos=150;//metros minimos para registro de cambio de posicion
 var Unidades =0;//cada 100mts o 23 segs
 var segsSinMov=0;// para llevar el tiempo sin movimiento, se suma una unidad
 var Banderazo=28;//al iniciar
@@ -31,6 +31,7 @@ var metrosCada100=0;
 var ventana_ancho=0;
 var ventana_alto=0;
 var valorUnidad=83;
+var bMostrandoMapa=false;
 
 function resetearValores(){
     ventana_ancho = $(window).width();
@@ -127,26 +128,41 @@ function cuentaSegs(){
 function mostrarMapa(posicion){
     var mapurl="img/logo.png";
     var ubicacion=document.getElementById('map');
-    if ((posicion===null)||(posicion===undefined)){
-        // SE TOMA EL VALOR ACTUAL DE LA POSICION 
-        mapurl='http://maps.google.com/maps/api/staticmap?center='+
-        objPositionAct.coords.latitude+','+objPositionAct.coords.longitude+
-        '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+objPositionAct.coords.latitude+
-        ','+objPositionAct.coords.longitude;
+
+        if ((posicion===null)||(posicion===undefined)){
+            // SE TOMA EL VALOR ACTUAL DE LA POSICION 
+            mapurl='http://maps.google.com/maps/api/staticmap?center='+
+            objPositionAct.coords.latitude+','+objPositionAct.coords.longitude+
+            '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+objPositionAct.coords.latitude+
+            ','+objPositionAct.coords.longitude;
+        }
+        else{
+            mapurl='http://maps.google.com/maps/api/staticmap?center='+
+            posicion.coords.latitude+','+posicion.coords.longitude+
+            '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+posicion.coords.latitude+
+            ','+posicion.coords.longitude;
+
+        }
+    //para toglear entre mostrar mapa y datos
+    if (bMostrandoMapa){
+        $("#info").show();
+        $("#btnVerMapa").buttonMarkup({theme: 'b'});
+        $("#btnVerMapa").text("Ver Mapa");
     }
     else{
-        mapurl='http://maps.google.com/maps/api/staticmap?center='+
-        posicion.coords.latitude+','+posicion.coords.longitude+
-        '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+posicion.coords.latitude+
-        ','+posicion.coords.longitude;
-        
+        $("#info").hide();
+        $("#btnVerMapa").buttonMarkup({theme: 'a'});
+        $("#btnVerMapa").text("Ver Info");
+        ubicacion.innerHTML='<img src="'+mapurl+'">';
     }
-    ubicacion.innerHTML='<img src="'+mapurl+'">';
+    bMostrandoMapa=!bMostrandoMapa;
+
+
 }
 
 function mostrar(posicion){
     //esto no ha actualizado
-    if (posicion.coords.accuracy<metMinRegPos){
+    if (posicion.coords.accuracy<=metMinRegPos){
         if (!bContaIni){
             horIni= new Date();
             objPositionAnt=posicion;
@@ -177,13 +193,13 @@ function mostrar(posicion){
                 }
             }
 
-            $("#timRec").text(restarFechasEnSegs( horIni, horAct)+" segs");    //$("#geolocation").text("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
-            //$("#timRec").text(toString());
-            mostrarPosiciones();
-            if (tieneInternetSN() && $("verMapa").val()==="verMapa"){
-                mostrarMapa(posicion);
-            }
         //$("#txtDato").value("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
+        }
+        $("#timRec").text(restarFechasEnSegs( horIni, horAct)+" segs");    //$("#geolocation").text("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
+        //$("#timRec").text(toString());
+        mostrarPosiciones();
+        if (tieneInternetSN() && $("verMapa").val()==="verMapa"){
+            mostrarMapa(posicion);
         }
     }
 
