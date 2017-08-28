@@ -16,7 +16,7 @@ var bContaIni = false;
 var fsumador=0;
 var ftemp=0;
 var nomArchivoTexto="prueba.txt";
-var metMinRegPos=10;//metros minimos para registro de cambio de posicion
+var metMinRegPos=5;//metros minimos para registro de cambio de posicion
 var Unidades =0;//cada 100mts o 23 segs
 var segsSinMov=0;// para llevar el tiempo sin movimiento, se suma una unidad
 var Banderazo=28;//al iniciar
@@ -154,10 +154,8 @@ function mostrar(posicion){
         $("#horIni").text("Hora Inicio : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());        
         bContaIni = true;
         losMetros=parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionIni.coords.latitude),parseFloat(objPositionIni.coords.longitude);
-        if (losMetros>metMinRegPos) {
-            aLat.push(objPositionIni.coords.latitude);
-            aLon.push(objPositionIni.coords.longitude);
-        }
+        aLat.push(objPositionIni.coords.latitude);
+        aLon.push(objPositionIni.coords.longitude);
 
         
     }
