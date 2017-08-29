@@ -106,7 +106,7 @@ function obtener(){
     resetearValores();
 
     $("#geolocation").text("obteniendo direccion...");
-    var options = {maximumAge: 20000, timeout: 30000, enableHighAccuracy: true };
+    var options = {maximumAge: 60000, timeout: 60000, enableHighAccuracy: true };
     $("#horAct").text("Hora Actual : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());
     //alert(horIni.toString());
     //$("#horIni").text(horIni.toString());
@@ -169,7 +169,7 @@ function mostrarMapa(posicion){
 
 function mostrar(posicion){
     //esto no ha actualizado
-    //if (posicion.coords.accuracy<=metMinRegPos){
+    if (posicion.coords.accuracy<=metMinRegPos*2){//metMinRegPos*2 para que acepte otras lecturas 
         
         if (!bContaIni){
             horIni= new Date();
@@ -217,7 +217,7 @@ function mostrar(posicion){
         if (tieneInternetSN() && $("verMapa").val()==="verMapa"){
             mostrarMapa(posicion);
         }
-    //}
+    }
 
 
 
