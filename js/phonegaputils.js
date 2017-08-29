@@ -169,7 +169,7 @@ function mostrarMapa(posicion){
 
 function mostrar(posicion){
     //esto no ha actualizado
-    if (posicion.coords.accuracy<=metMinRegPos){
+    //if (posicion.coords.accuracy<=metMinRegPos){
         
         if (!bContaIni){
             horIni= new Date();
@@ -189,7 +189,7 @@ function mostrar(posicion){
             $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
             losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
             if (losMetros>metMinRegPos) {
-                //objPosicionAnt=objPositionAct;
+                objPosicionAnt=objPositionAct;
                 aLat.push(objPositionAct.coords.latitude);
                 aLon.push(objPositionAct.coords.longitude);
                 Unidades+=(losMetros/100);
@@ -205,7 +205,8 @@ function mostrar(posicion){
                 }
                 */
             }
-            else lMovido=true;
+            else 
+                lMovido=true;
                 
 
         //$("#txtDato").value("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
@@ -216,7 +217,7 @@ function mostrar(posicion){
         if (tieneInternetSN() && $("verMapa").val()==="verMapa"){
             mostrarMapa(posicion);
         }
-    }
+    //}
 
 
 
