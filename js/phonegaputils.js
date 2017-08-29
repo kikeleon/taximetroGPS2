@@ -16,7 +16,7 @@ var bContaIni = false;
 var fsumador=0;
 var ftemp=0;
 var nomArchivoTexto="prueba.txt";
-var metMinRegPos=10;//metros minimos para registro de cambio de posicion
+var metMinRegPos=150;//metros minimos para registro de cambio de posicion
 var Unidades =0;//cada 100mts o 23 segs
 var segsSinMov=0;// para llevar el tiempo sin movimiento, se suma una unidad
 var Banderazo=28;//al iniciar
@@ -34,6 +34,9 @@ var valorUnidad=83;
 var bMostrandoMapa=false;
 
 function resetearValores(){
+    objPositionIni=objPositionAct;
+    objPositionAnt=objPositionAct;
+
     ventana_ancho = $(window).width();
     ventana_alto = $(window).height();
     bContaIni=false;
@@ -120,7 +123,11 @@ function cuentaSegs(){
             Unidades+=1;
             lMovido=false;
             iSegs=0;
-            mostrarPosiciones();
+            $("#unidades").text(Unidades.toString());
+            //mostrarPosiciones();
+        }
+        else{
+            
         }
     }
 }
@@ -163,6 +170,7 @@ function mostrarMapa(posicion){
 function mostrar(posicion){
     //esto no ha actualizado
     if (posicion.coords.accuracy<=metMinRegPos){
+        
         if (!bContaIni){
             horIni= new Date();
             objPositionAnt=posicion;
@@ -181,17 +189,24 @@ function mostrar(posicion){
             $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
             losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
             if (losMetros>metMinRegPos) {
-                objPosicionAnt=objPositionAct;
+                //objPosicionAnt=objPositionAct;
                 aLat.push(objPositionAct.coords.latitude);
                 aLon.push(objPositionAct.coords.longitude);
+                Unidades+=(losMetros/100);
+                lMovido=false;
+                /*
                 if (metrosCada100>=100){
                     metrosCada100-=100;
-                    Unidades+=1;
+                    //Unidades+=1;
+                    Unidades+=(losMetros/100);
                 }
                 else{
                     metrosCada100+=losMetros;
                 }
+                */
             }
+            else lMovido=true;
+                
 
         //$("#txtDato").value("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
         }
@@ -268,6 +283,7 @@ function restarFechasEnSegs(hini,hfin){
      var retVal=0;
      horAct = new Date();
      if (Unidades<50) retVal=4100;
+        
      else{
         retVal=Unidades*valorUnidad;
         if (horAct.getHours()>20) retVal+=recNoct;
