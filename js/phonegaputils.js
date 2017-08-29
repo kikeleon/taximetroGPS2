@@ -264,6 +264,7 @@ function restarFechasEnSegs(hini,hfin){
  
  function mostrarPosiciones(){
      $("#latlonIni").text("Inicio en : " + objPositionIni.coords.latitude + " , " + objPositionIni.coords.longitude);
+     $("#latlonAnt").text("Anterior en : " + objPositionAnt.coords.latitude + " , " + objPositionAnt.coords.longitude);
      $("#latlonAct").text("Actual en : " + objPositionAct.coords.latitude + " , " + objPositionAct.coords.longitude);
      //$("#disRec").text("Distancia recorrido : " + calcularDistanciaTotal().toString());
      eldato= calcularDistanciaTotalEnMetros();
