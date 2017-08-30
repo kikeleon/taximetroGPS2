@@ -16,7 +16,7 @@ var bContaIni = false;
 var fsumador=0;
 var ftemp=0;
 var nomArchivoTexto="prueba.txt";
-var metMinRegPos=3;//metros minimos para registro de cambio de posicion
+
 var Unidades =0;//cada 100mts o 23 segs
 var segsSinMov=0;// para llevar el tiempo sin movimiento, se suma una unidad
 var Banderazo=28;//al iniciar
@@ -32,6 +32,9 @@ var ventana_ancho=0;
 var ventana_alto=0;
 var valorUnidad=83;
 var bMostrandoMapa=false;
+var averageProm;
+
+var metMinRegPos=3;//metros minimos para registro de cambio de posicion
 
 function resetearValores(){
     objPositionIni=objPositionAct;
@@ -55,46 +58,6 @@ function resetearValores(){
     metrosCada100=0;
     Unidades=23;
 }
-function get_loc() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(coordenadas);
-    }else{
-        alert('Este navegador es algo antiguo, actualiza para usar el API de localización');                  }
-}
-
-function coordenadas(position) {
-      var lat = position.coords.latitude;
-      var lon = position.coords.longitude;
-      var map = document.getElementById("map");
-      map.src = "http://maps.google.com/maps/api/staticmap?center=" + lat + "," 
-              + lon + "&amp;zoom=15&amp;size=300x300&amp;markers=color:red|label:A|" + lat + "," + lon + "&amp;sensor=false";
-}
-
-function iniciarMapa(){
-    if ("geolocation" in navigator){ //check Geolocation available 
-        //things to do
-    }else{
-        $("#geolocation").text("No existe geolocation");
-    }
-}
-
-function onSuccess(position) {
-    //var element = document.getElementById('geolocation');
-    objPositionIni=position;
-    coordenadas(position);  
-    /*element.innerHTML = 'Latitude: '  + position.coords.latitude      + '<br />' +
-                        'Longitude: ' + position.coords.longitude     + '<br />' +
-                        '<hr />'      + element.innerHTML;
-     */
-    }
-
-        // onError Callback receives a PositionError object
-        //
-function onError(error) {
-    var errortmp="";
-    errortmp = 'code: '  + error.code + '\n' +'message: ' + error.message + '\n';
-     $("#geolocation").text(errortmp);
-}
 
 function obtener(){
     //navigator.geolocation.getCurrentPosition(mostrar, gestionarErrores);
@@ -107,7 +70,7 @@ function obtener(){
 
     $("#geolocation").text("obteniendo direccion...");
     var options = {maximumAge: 60000, timeout: 60000, enableHighAccuracy: true };
-    $("#horAct").text("Hora Actual : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());
+    
     //alert(horIni.toString());
     //$("#horIni").text(horIni.toString());
     watchID = navigator.geolocation.watchPosition(mostrar, manejoError, options);
@@ -117,19 +80,23 @@ function obtener(){
 }
 
 function cuentaSegs(){
-    iSegs+=1;
-    if (iSegs>23){
-        if (!lMovido){
+    iSegs+=1;    
+    if (!lMovido){
+        if (iSegs>23){
             Unidades+=1;
-            lMovido=false;
             iSegs=0;
-            $("#unidades").text(Unidades.toString());
-            //mostrarPosiciones();
+            $("#unidades").text(Unidades.toString());//solo mostramos el cambio en unidades
         }
         else{
-            
+
         }
     }
+    else{
+        if (iSegs>5){
+            lMovido=false;
+        }
+    }
+
 }
 
 function mostrarMapa(posicion){
@@ -183,30 +150,25 @@ function mostrar(posicion){
             aLon.push(objPositionIni.coords.longitude);
         }
         else{
+            //FECHA
             horAct = new Date();
+            $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
+            //ACTUALIZA POSICIONES
             objPositionAnt=objPositionAct;
             objPositionAct=posicion;
-            $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
+            //CALCULA LOS METROS DEL MOVIMIENTO
             losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
-            if (losMetros>metMinRegPos) {
+            if (losMetros>metMinRegPos){
                 objPosicionAnt=objPositionAct;
                 aLat.push(objPositionAct.coords.latitude);
                 aLon.push(objPositionAct.coords.longitude);
                 Unidades+=(losMetros/100);
-                lMovido=false;
-                /*
-                if (metrosCada100>=100){
-                    metrosCada100-=100;
-                    //Unidades+=1;
-                    Unidades+=(losMetros/100);
-                }
-                else{
-                    metrosCada100+=losMetros;
-                }
-                */
-            }
-            else 
                 lMovido=true;
+                $("#disRecUlt").text("Ultima Distancia recorrido Valida: " + losMetros.toString() + "mts");
+            }
+            else{
+                $("#disRecUlt").text("Ultima Distancia recorrido No Valida: " + losMetros.toString() + "mts");
+            }
                 
 
         //$("#txtDato").value("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
@@ -218,6 +180,7 @@ function mostrar(posicion){
             mostrarMapa(posicion);
         }
     }
+    else 
 
 
 
@@ -274,7 +237,7 @@ function restarFechasEnSegs(hini,hfin){
      $("#valor").text("$"+eldato.toString());
      
      eldato=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
-     $("#disRecUlt").text("Ultima Distancia recorrido : " + eldato.toString() + "mts");
+     
      $("#geolocation").text("Exactitud en medida " + objPositionAct.coords.accuracy);
      
      $("#listening").text("se va a escribir");
@@ -466,3 +429,44 @@ function readAsText(readerDummy) {
     };
     reader.readAsText(readerDummy);
 }   
+
+function get_loc() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(coordenadas);
+    }else{
+        alert('Este navegador es algo antiguo, actualiza para usar el API de localización');                  }
+}
+
+function coordenadas(position) {
+      var lat = position.coords.latitude;
+      var lon = position.coords.longitude;
+      var map = document.getElementById("map");
+      map.src = "http://maps.google.com/maps/api/staticmap?center=" + lat + "," 
+              + lon + "&amp;zoom=15&amp;size=300x300&amp;markers=color:red|label:A|" + lat + "," + lon + "&amp;sensor=false";
+}
+
+function iniciarMapa(){
+    if ("geolocation" in navigator){ //check Geolocation available 
+        //things to do
+    }else{
+        $("#geolocation").text("No existe geolocation");
+    }
+}
+
+function onSuccess(position) {
+    //var element = document.getElementById('geolocation');
+    objPositionIni=position;
+    coordenadas(position);  
+    /*element.innerHTML = 'Latitude: '  + position.coords.latitude      + '<br />' +
+                        'Longitude: ' + position.coords.longitude     + '<br />' +
+                        '<hr />'      + element.innerHTML;
+     */
+    }
+
+        // onError Callback receives a PositionError object
+        //
+function onError(error) {
+    var errortmp="";
+    errortmp = 'code: '  + error.code + '\n' +'message: ' + error.message + '\n';
+     $("#geolocation").text(errortmp);
+}
