@@ -180,10 +180,6 @@ function mostrar(posicion){
             mostrarMapa(posicion);
         }
     }
-    else 
-
-
-
     
 }
 
