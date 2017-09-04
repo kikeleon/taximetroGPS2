@@ -33,7 +33,7 @@ var valorUnidad=83;
 var bMostrandoMapa=false;
 var averageProm;
 
-var metMinRegPos=3;//metros minimos para registro de cambio de posicion
+var metMinRegPos=10;//metros minimos para registro de cambio de posicion
 
 function resetearValores(){
     objPositionIni=objPositionAct;
@@ -135,7 +135,7 @@ function mostrarMapa(posicion){
 
 function mostrar(posicion){
     //esto no ha actualizado
-    if (posicion.coords.accuracy<=metMinRegPos*2){//metMinRegPos*2 para que acepte otras lecturas 
+    if (posicion.coords.accuracy<=6){//metMinRegPos*2 para que acepte otras lecturas 
         
         if (!bContaIni){
             horIni= new Date();
