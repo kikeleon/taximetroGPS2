@@ -20,7 +20,6 @@ var nomArchivoTexto="prueba.txt";
 var Unidades =0;//cada 100mts o 23 segs
 var segsSinMov=0;// para llevar el tiempo sin movimiento, se suma una unidad
 var Banderazo=28;//al iniciar
-var valUnidad = 82;
 var recNoct = 2100;
 var recFest = 2000;
 var carMinima = 50;// numero de unidades mínimas
@@ -85,7 +84,7 @@ function cuentaSegs(){
         if (iSegs>23){
             Unidades+=1;
             iSegs=0;
-            $("#unidades").text(Unidades.toString());//solo mostramos el cambio en unidades
+            $("#unidades").text(Unidades.toFixed(1));//solo mostramos el cambio en unidades
         }
         else{
 
@@ -136,7 +135,7 @@ function mostrarMapa(posicion){
 
 function mostrar(posicion){
     //esto no ha actualizado
-    if (posicion.coords.accuracy<=metMinRegPos*2){//metMinRegPos*2 para que acepte otras lecturas 
+    //if (posicion.coords.accuracy<=metMinRegPos*2){//metMinRegPos*2 para que acepte otras lecturas 
         
         if (!bContaIni){
             horIni= new Date();
@@ -154,12 +153,11 @@ function mostrar(posicion){
             horAct = new Date();
             $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
             //ACTUALIZA POSICIONES
-            objPositionAnt=objPositionAct;
             objPositionAct=posicion;
             //CALCULA LOS METROS DEL MOVIMIENTO
             losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
             if (losMetros>metMinRegPos){
-                objPosicionAnt=objPositionAct;
+                objPositionAnt=objPositionAct;
                 aLat.push(objPositionAct.coords.latitude);
                 aLon.push(objPositionAct.coords.longitude);
                 Unidades+=(losMetros/100);
@@ -179,7 +177,7 @@ function mostrar(posicion){
         if (tieneInternetSN() && $("verMapa").val()==="verMapa"){
             mostrarMapa(posicion);
         }
-    }
+    //}
     
 }
 
@@ -228,7 +226,7 @@ function restarFechasEnSegs(hini,hfin){
      //$("#disRec").text("Distancia recorrido : " + calcularDistanciaTotal().toString());
      eldato= calcularDistanciaTotalEnMetros();
      $("#disRec").text( eldato.toString() +"mts");
-     $("#unidades").text(Unidades.toString());
+     $("#unidades").text(Unidades.toFixed(1));
      eldato= calcularValorPorUnidades();
      $("#valor").text("$"+eldato.toString());
      
@@ -249,11 +247,9 @@ function restarFechasEnSegs(hini,hfin){
         retVal=Unidades*valorUnidad;
         if (horAct.getHours()>20) retVal+=recNoct;
      } 
-         
-     
-     //FALTA EL CALCULO DE FESTIVOS
-     
-     return retVal;
+
+    //parseFloat(retVal.toFixed(3));
+    return parseInt(retVal);
  }
  
  function calcularDistanciaTotalEnMetros(){
