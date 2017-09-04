@@ -135,7 +135,7 @@ function mostrarMapa(posicion){
 
 function mostrar(posicion){
     //esto no ha actualizado
-    //if (posicion.coords.accuracy<=metMinRegPos*2){//metMinRegPos*2 para que acepte otras lecturas 
+    if (posicion.coords.accuracy<=metMinRegPos*2){//metMinRegPos*2 para que acepte otras lecturas 
         
         if (!bContaIni){
             horIni= new Date();
@@ -177,7 +177,7 @@ function mostrar(posicion){
         if (tieneInternetSN() && $("verMapa").val()==="verMapa"){
             mostrarMapa(posicion);
         }
-    //}
+    }
     
 }
 
