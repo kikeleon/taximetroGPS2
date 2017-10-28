@@ -67,13 +67,12 @@
             serial.open(
                     {baudRate: 9600},
                 function(successMessage) {
-                            serial.write(
-                            '1',
-                        function(successMessage) {
-                            alert(successMessage);
-                        },
-                        errorCallback
-                            );
+                        serial.read(
+                            function(successMessage) {
+                                $("#red").text(successMessage);
+                            },
+                            errorCallback
+                        );
                     },
                     errorCallback
                 );
