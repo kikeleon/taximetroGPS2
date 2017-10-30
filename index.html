@@ -69,7 +69,7 @@
                 function(successMessage) {
                         serial.read(
                             function(successMessage) {
-                                $("#red").text(successMessage);
+                                $("#red").text(successMessage.toString());
                             },
                             errorCallback
                         );
