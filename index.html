@@ -53,7 +53,8 @@
     <script src="js/phonegaputils.js"></script>
 
     <script>
-        var view =new Uint8Array();
+        var view = new Uint8Array([]);
+         var decoder = new TextDecoder(view);
     function xx(){
         $("#geolocation").text("obteniendo direccion...");
     }
@@ -70,7 +71,8 @@
                         serial.read(
                             function(successMessage) {
                                 view += Uint8Array(successMessage);
-                                $("#red").text(view);
+                                decoder += TextDecoder(view);
+                                $("#red").text(decoder);
                             },
                             errorCallback
                         );
