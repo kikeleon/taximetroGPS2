@@ -70,8 +70,8 @@
                 function(successMessage) {
                         serial.read(
                             function(successMessage) {
-                                view += Uint8Array(successMessage);
-                                decoder += TextDecoder(view);
+                                view = new Uint8Array(successMessage);
+                                decoder = new TextDecoder(view);
                                 $("#red").text(decoder);
                             },
                             errorCallback
