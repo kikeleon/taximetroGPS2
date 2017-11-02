@@ -53,8 +53,9 @@
     <script src="js/phonegaputils.js"></script>
 
     <script>
-        var view = new Uint8Array([]);
-         var decoder = new TextDecoder(view);
+        var arrayTotal = [];
+        var conta =0;
+        
     function xx(){
         $("#geolocation").text("obteniendo direccion...");
     }
@@ -71,8 +72,13 @@
                         serial.read(
                             function(successMessage) {
                                 view = new Uint8Array(successMessage);
-                                decoder = new TextDecoder(view);
-                                $("#red").text(decoder);
+                                for (var i = 0; i < view.byteLength; i++) {
+                                    arrayTotal[conta] = uint8Array[i];
+                                    conta=conta+1;
+                                }
+                                for (var i = 0; i < arrayTotal.length; i+=1) {
+                                    $("#red").text(decoder) + arrayTotal[i]);
+                                }
                             },
                             errorCallback
                         );
