@@ -1,7 +1,5 @@
-
 <!--
     Copyright (c) 2012-2016 Adobe Systems Incorporated. All rights reserved.
-
     Licensed to the Apache Software Foundation (ASF) under one
     or more contributor license agreements.  See the NOTICE file
     distributed with this work for additional information
@@ -9,9 +7,7 @@
     to you under the Apache License, Version 2.0 (the
     "License"); you may not use this file except in compliance
     with the License.  You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
     Unless required by applicable law or agreed to in writing,
     software distributed under the License is distributed on an
     "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -63,7 +59,6 @@
         var errorCallback = function(message) {
         alert('Error: ' + message);
         };
-
         serial.requestPermission(
         function(successMessage) {
             serial.open(
@@ -72,12 +67,13 @@
                         serial.read(
                             function(successMessage) {
                                 view = new Uint8Array(successMessage);
+                                $("#debug1").text(arrayTotal[i]);
                                 for (var i = 0; i < view.byteLength; i++) {
                                     arrayTotal[conta] = uint8Array[i];
                                     conta=conta+1;
                                 }
                                 for (var i = 0; i < arrayTotal.length; i+=1) {
-                                    $("#red").text(arrayTotal[i]);
+                                    $("#debug2").text(arrayTotal[i]);
                                 }
                             },
                             errorCallback
@@ -127,6 +123,8 @@
                 <p id="disRecUlt">Ultima distancia </p>
                 <p id="listening">Conectando....</p>
                 <p id="red">red </p>
+                <p id="debug1"> Debug 1</p>
+                <p id="debug2"> Debug 2</p>
             </div>
             <div id="map"></div>
     
