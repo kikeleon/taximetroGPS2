@@ -64,12 +64,13 @@
             serial.open(
                     {baudRate: 9600},
                 function(successMessage) {
+                        /*
                         serial.read(
                             function(successMessage) {
                                 view = new Uint8Array(successMessage);
                                 $("#debug1").text(uintToString(view));
                                 textDelArray+=uintToString(view);
-                                /*
+                                
                                 for (var i = 0; i < view.byteLength; i++) {
                                     arrayTotal[conta] = uint8Array[i];
                                     conta=conta+1;
@@ -77,11 +78,22 @@
                                 for (var i = 0; i < arrayTotal.length; i+=1) {
                                     $("#debug2").text(arrayTotal[i]);
                                 }
-                                */
+                                
                                $("#debug2").text(textDelArray);
                             },
                             errorCallback
                         );
+                        */
+                    serial.registerReadCallback(
+                    function success(data){
+                        var view = new Uint8Array(data);
+                        $("#debug1").text(uintToString(view));
+                        textDelArray+=uintToString(view);
+                        $("#debug2").text(textDelArray);
+                    },
+                    function error(){
+                        new Error("Failed to register read callback");
+                    });
                     },
                     errorCallback
                 );
@@ -94,6 +106,9 @@
             decodedString = decodeURIComponent(escape(encodedString));
         return decodedString;
     }
+    
+    
+
     </script>
 </head>
 
