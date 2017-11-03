@@ -67,7 +67,7 @@
                         serial.read(
                             function(successMessage) {
                                 view = new Uint8Array(successMessage);
-                                $("#debug1").text(view);
+                                $("#debug1").text(uintToString(view));
                                 for (var i = 0; i < view.byteLength; i++) {
                                     arrayTotal[conta] = uint8Array[i];
                                     conta=conta+1;
@@ -84,6 +84,11 @@
             },
         errorCallback
         );
+    }
+    function uintToString(uintArray) {
+        var encodedString = String.fromCharCode.apply(null, uintArray),
+            decodedString = decodeURIComponent(escape(encodedString));
+        return decodedString;
     }
     </script>
 </head>
