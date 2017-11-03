@@ -51,7 +51,7 @@
     <script>
         var arrayTotal = [];
         var conta =0;
-        
+        var textDelArray="";
     function xx(){
         $("#geolocation").text("obteniendo direccion...");
     }
@@ -68,6 +68,8 @@
                             function(successMessage) {
                                 view = new Uint8Array(successMessage);
                                 $("#debug1").text(uintToString(view));
+                                textDelArray+=uintToString(view);
+                                /*
                                 for (var i = 0; i < view.byteLength; i++) {
                                     arrayTotal[conta] = uint8Array[i];
                                     conta=conta+1;
@@ -75,6 +77,8 @@
                                 for (var i = 0; i < arrayTotal.length; i+=1) {
                                     $("#debug2").text(arrayTotal[i]);
                                 }
+                                */
+                               $("#debug2").text(textDelArray);
                             },
                             errorCallback
                         );
