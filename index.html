@@ -67,7 +67,7 @@
                         serial.read(
                             function(successMessage) {
                                 view = new Uint8Array(successMessage);
-                                $("#debug1").text(arrayTotal[i]);
+                                $("#debug1").text(view);
                                 for (var i = 0; i < view.byteLength; i++) {
                                     arrayTotal[conta] = uint8Array[i];
                                     conta=conta+1;
