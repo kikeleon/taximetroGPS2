@@ -52,6 +52,8 @@
         var arrayTotal = [];
         var conta =0;
         var textDelArray="";
+        var aLin;
+        
     function xx(){
         $("#geolocation").text("obteniendo direccion...");
     }
@@ -64,7 +66,7 @@
             serial.open(
                     {baudRate: 9600},
                 function(successMessage) {
-                        /*
+                        /*ESTO SOLO FUNCIONA PARA LEER CADA VEZ QUE SE OPIRME
                         serial.read(
                             function(successMessage) {
                                 view = new Uint8Array(successMessage);
@@ -84,16 +86,17 @@
                             errorCallback
                         );
                         */
-                    serial.registerReadCallback(
-                    function success(data){
-                        var view = new Uint8Array(data);
-                        $("#debug1").text(uintToString(view));
-                        textDelArray+=uintToString(view);
-                        $("#debug2").text(textDelArray);
-                    },
-                    function error(){
-                        new Error("Failed to register read callback");
-                    });
+                        serial.registerReadCallback(
+                            function success(data){
+                                var view = new Uint8Array(data);
+                                //$("#debug1").text(uintToString(view));
+                                //textDelArray+=uintToString(view);
+                                recibirDatoSerial(uintToString(view));//recibe el dato del puerto y arma el alim
+                                
+                            },
+                            function error(){
+                                new Error("Falla to register read callback");
+                            });
                     },
                     errorCallback
                 );
@@ -107,7 +110,26 @@
         return decodedString;
     }
     
-    
+    function recibirDatoSerial(sDatoSerial){
+        var sLetra="";
+        var fLinea=false;
+        
+        var sLin;
+        for (i=0;sDatoSerial.length;i++){
+            sLetra = sDatoSerial.substr(i,1);
+            if (sLetra ==="$"){
+                if (fLinea){
+                    aLin.push(sLin);
+                    $("#debug2").text(sLin);
+                }
+                aLin="$";
+                fLinea=true;
+            }
+            else{
+                sLin += sLetra;
+            }
+        }
+    }
 
     </script>
 </head>
