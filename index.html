@@ -90,7 +90,7 @@
                             function success(data){
                                 var view = new Uint8Array(data);
                                 //$("#debug1").text(uintToString(view));
-                                //textDelArray+=uintToString(view);
+                                textDelArray+=uintToString(view);
                                 recibirDatoSerial(uintToString(view));//recibe el dato del puerto y arma el alim
                                 
                             },
@@ -130,7 +130,34 @@
             }
         }
     }
+    
+    function mostrarDatosRecibidos(){
+         $("#debug2").text(textDelArray);
+    }
 
+    function convertirGraaDec(sGradosMinutos, bLatLon){
+        /*
+         * 
+         * (23° 08' 06'' N) = (23 + (08 / 60) + (06 / 3600)) = 23.134999
+         */
+        var dd="";
+        var mm="";
+        var ss="";
+        var retVal=0;
+        if (bLatLon){//si es verdadeso saca Latitud ddmm.ss
+            dd=sGradosMinutos.substr(0, 2);
+            mm=sGradosMinutos.substr(3, 2);
+            ss=sGradosMinutos.substr(5, 2);
+        }//latitul dddmm.ss
+        else{
+            dd=sGradosMinutos.substr(0, 3);
+            mm=sGradosMinutos.substr(3, 2);
+            ss=sGradosMinutos.substr(5, 2);           
+        }
+        retVal=(Number(dd)+(Number(mm)/60)+(Number(ss)/3600));
+        return retVal;
+    }
+    
     </script>
 </head>
 
@@ -185,7 +212,7 @@
                     <span id="disRec" class="textoGrandeOscuro">0mts</span>
                     </div>
                     <div class="ui-block-c">
-                    <a href="#" class="ui-btn ui-corner-all ui-shadow">UNIDADES</a><br>
+                    <a href="javascript:mostrarDatosRecibidos()" class="ui-btn ui-corner-all ui-shadow">UNIDADES</a><br>
                     <span id="unidades" class="textoGrandeOscuro">0</span>
                     </div>
                     <div class="ui-block-d">
