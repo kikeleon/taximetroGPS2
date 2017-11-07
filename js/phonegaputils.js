@@ -35,6 +35,15 @@ var averageProm;
 
 var metMinRegPos=10;//metros minimos para registro de cambio de posicion
 
+var bPriVez=false;//para saber si ya se obtuvo la primer posicion
+
+//CON GPS USB
+var arrayTotal = [];
+var conta =0;
+var textDelArray="";
+var aLin = [];
+
+
 function resetearValores(){
     objPositionIni=objPositionAct;
     objPositionAnt=objPositionAct;
@@ -56,6 +65,10 @@ function resetearValores(){
     lMovido=false;//controla movimientos de carro;
     metrosCada100=0;
     Unidades=23;
+    if (bPriVez){
+        mostrarPosiciones();
+    }
+    
 }
 
 function obtener(){
@@ -72,8 +85,10 @@ function obtener(){
     
     //alert(horIni.toString());
     //$("#horIni").text(horIni.toString());
-    watchID = navigator.geolocation.watchPosition(mostrar, manejoError, options);
-    //mostrar();
+    //ESTO FUNCIONA
+    //watchID = navigator.geolocation.watchPosition(mostrar, manejoError, options);
+    
+    
     //INICIAR CONTEO DE SEGUNDOS
     window.setInterval(function(){cuentaSegs(); }, 1000);
 }
@@ -135,7 +150,7 @@ function mostrarMapa(posicion){
 
 function mostrar(posicion){
     //esto no ha actualizado
-    if (posicion.coords.accuracy<=6){//metMinRegPos*2 para que acepte otras lecturas 
+    if (posicion.coords.accuracy<=150){//metMinRegPos*2 para que acepte otras lecturas 
         
         if (!bContaIni){
             horIni= new Date();
@@ -144,7 +159,7 @@ function mostrar(posicion){
             objPositionIni=posicion;
             $("#horIni").text("Hora Inicio : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());        
             bContaIni = true;
-            losMetros=parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionIni.coords.latitude),parseFloat(objPositionIni.coords.longitude);
+            losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionIni.coords.latitude),parseFloat(objPositionIni.coords.longitude));
             aLat.push(objPositionIni.coords.latitude);
             aLon.push(objPositionIni.coords.longitude);
         }
@@ -174,13 +189,131 @@ function mostrar(posicion){
         $("#timRec").text(restarFechasEnSegs( horIni, horAct)+" segs");    //$("#geolocation").text("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
         //$("#timRec").text(toString());
         mostrarPosiciones();
-        if (tieneInternetSN() && $("verMapa").val()==="verMapa"){
+        if (tieneInternetSN() && $("#verMapa").is(':checked')){
             mostrarMapa(posicion);
         }
     }
     
 }
+ function mostrarPosiciones(){
+     $("#latlonIni").text("Inicio en : " + objPositionIni.coords.latitude + " , " + objPositionIni.coords.longitude);
+     $("#latlonAnt").text("Anterior en : " + objPositionAnt.coords.latitude + " , " + objPositionAnt.coords.longitude);
+     $("#latlonAct").text("Actual en : " + objPositionAct.coords.latitude + " , " + objPositionAct.coords.longitude);
+     //$("#disRec").text("Distancia recorrido : " + calcularDistanciaTotal().toString());
+     eldato= calcularDistanciaTotalEnMetros();
+     $("#disRec").text( eldato.toString() +"mts");
+     $("#unidades").text(Unidades.toFixed(1));
+     eldato= calcularValorPorUnidades();
+     $("#valor").text("$"+eldato.toString());
+     
+     eldato=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
+     
+     $("#geolocation").text("Exactitud en medida " + objPositionAct.coords.accuracy);
+     
+     $("#listening").text("se va a escribir");
+     //escribir();
+  }
+  ////////////////////////////////////////////////////////////////////////
+  function mostrarMapa2(posicion){
+    var mapurl="img/logo.png";
+    var ubicacion=document.getElementById('map');
 
+        if ((posicion===null)||(posicion===undefined)){
+            // SE TOMA EL VALOR ACTUAL DE LA POSICION 
+            mapurl='http://maps.google.com/maps/api/staticmap?center='+
+            objPositionAct.coords.latitude+','+objPositionAct.coords.longitude+
+            '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+objPositionAct.coords.latitude+
+            ','+objPositionAct.coords.longitude;
+        }
+        else{
+            mapurl='http://maps.google.com/maps/api/staticmap?center='+
+            posicion.coords.latitude+','+posicion.coords.longitude+
+            '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+posicion.coords.latitude+
+            ','+posicion.coords.longitude;
+
+        }
+    //para toglear entre mostrar mapa y datos
+    if (bMostrandoMapa){
+        $("#info").show();
+        $("#btnVerMapa").buttonMarkup({theme: 'b'});
+        $("#btnVerMapa").text("Ver Mapa");
+    }
+    else{
+        $("#info").hide();
+        $("#btnVerMapa").buttonMarkup({theme: 'a'});
+        $("#btnVerMapa").text("Ver Info");
+        ubicacion.innerHTML='<img src="'+mapurl+'">';
+    }
+    bMostrandoMapa=!bMostrandoMapa;
+
+
+}
+
+function mostrar2(posicion){
+    //esto no ha actualizado
+    if (posicion.coords.accuracy<=150){//metMinRegPos*2 para que acepte otras lecturas 
+        
+        if (!bContaIni){
+            horIni= new Date();
+            objPositionAnt=posicion;
+            objPositionAct=posicion;
+            objPositionIni=posicion;
+            $("#horIni").text("Hora Inicio : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());        
+            bContaIni = true;
+            losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionIni.coords.latitude),parseFloat(objPositionIni.coords.longitude));
+            aLat.push(objPositionIni.coords.latitude);
+            aLon.push(objPositionIni.coords.longitude);
+        }
+        else{
+            //FECHA
+            horAct = new Date();
+            $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
+            //ACTUALIZA POSICIONES
+            objPositionAct=posicion;
+            //CALCULA LOS METROS DEL MOVIMIENTO
+            losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
+            if (losMetros>metMinRegPos){
+                objPositionAnt=objPositionAct;
+                aLat.push(objPositionAct.coords.latitude);
+                aLon.push(objPositionAct.coords.longitude);
+                Unidades+=(losMetros/100);
+                lMovido=true;
+                $("#disRecUlt").text("Ultima Distancia recorrido Valida: " + losMetros.toString() + "mts");
+            }
+            else{
+                $("#disRecUlt").text("Ultima Distancia recorrido No Valida: " + losMetros.toString() + "mts");
+            }
+                
+
+        //$("#txtDato").value("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
+        }
+        $("#timRec").text(restarFechasEnSegs( horIni, horAct)+" segs");    //$("#geolocation").text("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
+        //$("#timRec").text(toString());
+        mostrarPosiciones();
+        if (tieneInternetSN() && $("#verMapa").is(':checked')){
+            mostrarMapa(posicion);
+        }
+    }
+    
+}
+ function mostrarPosiciones2(){
+     $("#latlonIni").text("Inicio en : " + objPositionIni.coords.latitude + " , " + objPositionIni.coords.longitude);
+     $("#latlonAnt").text("Anterior en : " + objPositionAnt.coords.latitude + " , " + objPositionAnt.coords.longitude);
+     $("#latlonAct").text("Actual en : " + objPositionAct.coords.latitude + " , " + objPositionAct.coords.longitude);
+     //$("#disRec").text("Distancia recorrido : " + calcularDistanciaTotal().toString());
+     eldato= calcularDistanciaTotalEnMetros();
+     $("#disRec").text( eldato.toString() +"mts");
+     $("#unidades").text(Unidades.toFixed(1));
+     eldato= calcularValorPorUnidades();
+     $("#valor").text("$"+eldato.toString());
+     
+     eldato=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
+     
+     $("#geolocation").text("Exactitud en medida " + objPositionAct.coords.accuracy);
+     
+     $("#listening").text("se va a escribir");
+     //escribir();
+  }
 function restarFechasEnSegs(hini,hfin){
     millisegsIni = hini.getTime();
     millisegsAct = hfin.getTime();
@@ -207,7 +340,7 @@ function restarFechasEnSegs(hini,hfin){
       */
      var internetSN = false;
      var retCon = navigator.connection.type;
-     retCon.toUpperCase();
+     retCon=retCon.toUpperCase();
      $("#red").text(navigator.connection.type);
      /*if ((retCon === 2) || (retCon === 3) || (retCon === 4) || (retCon === 5) || (retCon === 6) || (retCon === 7)){
          internetSN = true;
@@ -219,24 +352,7 @@ function restarFechasEnSegs(hini,hfin){
     return internetSN;
  }
  
- function mostrarPosiciones(){
-     $("#latlonIni").text("Inicio en : " + objPositionIni.coords.latitude + " , " + objPositionIni.coords.longitude);
-     $("#latlonAnt").text("Anterior en : " + objPositionAnt.coords.latitude + " , " + objPositionAnt.coords.longitude);
-     $("#latlonAct").text("Actual en : " + objPositionAct.coords.latitude + " , " + objPositionAct.coords.longitude);
-     //$("#disRec").text("Distancia recorrido : " + calcularDistanciaTotal().toString());
-     eldato= calcularDistanciaTotalEnMetros();
-     $("#disRec").text( eldato.toString() +"mts");
-     $("#unidades").text(Unidades.toFixed(1));
-     eldato= calcularValorPorUnidades();
-     $("#valor").text("$"+eldato.toString());
-     
-     eldato=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
-     
-     $("#geolocation").text("Exactitud en medida " + objPositionAct.coords.accuracy);
-     
-     $("#listening").text("se va a escribir");
-     //escribir();
-  }
+
  
  function calcularValorPorUnidades(){
      var retVal=0;
@@ -453,6 +569,7 @@ function onSuccess(position) {
                         'Longitude: ' + position.coords.longitude     + '<br />' +
                         '<hr />'      + element.innerHTML;
      */
+    bPriVez=true;
     }
 
         // onError Callback receives a PositionError object
@@ -462,3 +579,65 @@ function onError(error) {
     errortmp = 'code: '  + error.code + '\n' +'message: ' + error.message + '\n';
      $("#geolocation").text(errortmp);
 }
+
+
+    function leerPuerto(){
+
+        abrirPuertoYleerBuffer();
+        //recibirDatoSerial("194  15:12:10.214  24 $GPGSV,1,1,01,20,,,24*7C 195  15:12:10.217  28 $GPGLL,,,,,201210.092,V,N*71");
+    }
+    
+
+    function uintToString(uintArray) {
+        var encodedString = String.fromCharCode.apply(null, uintArray),
+            decodedString = decodeURIComponent(escape(encodedString));
+        return decodedString;
+    }
+    
+    function recibirDatoSerial(sDatoSerial){
+        var sLetra="";
+        var fLinea=false;
+        $("#debug1").text(sDatoSerial);
+        var sLin="";
+        for (i=0;i < sDatoSerial.length;i++){
+            sLetra = sDatoSerial.substr(i,1);
+            if (sLetra ==="$"){
+                if (fLinea){
+                    aLin.push(sLin);
+                    $("#debug2").text(sLin);
+                }
+                sLin="$";
+                fLinea=true;
+            }
+            else{
+                sLin = sLin + sLetra;
+            }
+        }
+    }
+    
+    function mostrarDatosRecibidos(){
+         $("#debug2").text(textDelArray);
+    }
+
+    function convertirGraaDec(sGradosMinutos, bLatLon){
+        /*
+         * 
+         * (23° 08' 06'' N) = (23 + (08 / 60) + (06 / 3600)) = 23.134999
+         */
+        var dd="";
+        var mm="";
+        var ss="";
+        var retVal=0;
+        if (bLatLon){//si es verdadeso saca Latitud ddmm.ss
+            dd=sGradosMinutos.substr(0, 2);
+            mm=sGradosMinutos.substr(3, 2);
+            ss=sGradosMinutos.substr(5, 2);
+        }//latitul dddmm.ss
+        else{
+            dd=sGradosMinutos.substr(0, 3);
+            mm=sGradosMinutos.substr(3, 2);
+            ss=sGradosMinutos.substr(5, 2);           
+        }
+        retVal=(Number(dd)+(Number(mm)/60)+(Number(ss)/3600));
+        return retVal;
+    }
