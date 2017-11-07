@@ -49,24 +49,17 @@
     <script src="js/phonegaputils.js"></script>
 
     <script>
-        var arrayTotal = [];
-        var conta =0;
-        var textDelArray="";
-        var aLin = [];
+
         
     function xx(){
         $("#geolocation").text("obteniendo direccion...");
     }
-    function leerPuerto(){
+    
+    function abrirPuertoYleerBuffer(){
         var errorCallback = 
         function(message) {
             alert('Error: ' + message);
         };
-        abrirPuertoYleerBuffer();
-        //recibirDatoSerial("194  15:12:10.214  24 $GPGSV,1,1,01,20,,,24*7C 195  15:12:10.217  28 $GPGLL,,,,,201210.092,V,N*71");
-    }
-    
-    function abrirPuertoYleerBufer(){
         serial.requestPermission(
         function(successMessage) {
             serial.open(
@@ -110,59 +103,7 @@
         errorCallback
         );
     }
-    function uintToString(uintArray) {
-        var encodedString = String.fromCharCode.apply(null, uintArray),
-            decodedString = decodeURIComponent(escape(encodedString));
-        return decodedString;
-    }
     
-    function recibirDatoSerial(sDatoSerial){
-        var sLetra="";
-        var fLinea=false;
-        $("#debug1").text(sDatoSerial);
-        var sLin="";
-        for (i=0;i < sDatoSerial.length;i++){
-            sLetra = sDatoSerial.substr(i,1);
-            if (sLetra ==="$"){
-                if (fLinea){
-                    aLin.push(sLin);
-                    $("#debug2").text(sLin);
-                }
-                sLin="$";
-                fLinea=true;
-            }
-            else{
-                sLin = sLin + sLetra;
-            }
-        }
-    }
-    
-    function mostrarDatosRecibidos(){
-         $("#debug2").text(textDelArray);
-    }
-
-    function convertirGraaDec(sGradosMinutos, bLatLon){
-        /*
-         * 
-         * (23° 08' 06'' N) = (23 + (08 / 60) + (06 / 3600)) = 23.134999
-         */
-        var dd="";
-        var mm="";
-        var ss="";
-        var retVal=0;
-        if (bLatLon){//si es verdadeso saca Latitud ddmm.ss
-            dd=sGradosMinutos.substr(0, 2);
-            mm=sGradosMinutos.substr(3, 2);
-            ss=sGradosMinutos.substr(5, 2);
-        }//latitul dddmm.ss
-        else{
-            dd=sGradosMinutos.substr(0, 3);
-            mm=sGradosMinutos.substr(3, 2);
-            ss=sGradosMinutos.substr(5, 2);           
-        }
-        retVal=(Number(dd)+(Number(mm)/60)+(Number(ss)/3600));
-        return retVal;
-    }
     
     </script>
 </head>
