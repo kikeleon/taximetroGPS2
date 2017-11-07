@@ -52,15 +52,21 @@
         var arrayTotal = [];
         var conta =0;
         var textDelArray="";
-        var aLin;
+        var aLin = [];
         
     function xx(){
         $("#geolocation").text("obteniendo direccion...");
     }
     function leerPuerto(){
-        var errorCallback = function(message) {
-        alert('Error: ' + message);
+        var errorCallback = 
+        function(message) {
+            alert('Error: ' + message);
         };
+        abrirPuertoYleerBuffer();
+        //recibirDatoSerial("194  15:12:10.214  24 $GPGSV,1,1,01,20,,,24*7C 195  15:12:10.217  28 $GPGLL,,,,,201210.092,V,N*71");
+    }
+    
+    function abrirPuertoYleerBufer(){
         serial.requestPermission(
         function(successMessage) {
             serial.open(
@@ -114,7 +120,7 @@
         var sLetra="";
         var fLinea=false;
         $("#debug1").text(sDatoSerial);
-        var sLin;
+        var sLin="";
         for (i=0;i < sDatoSerial.length;i++){
             sLetra = sDatoSerial.substr(i,1);
             if (sLetra ==="$"){
@@ -122,11 +128,11 @@
                     aLin.push(sLin);
                     $("#debug2").text(sLin);
                 }
-                aLin="$";
+                sLin="$";
                 fLinea=true;
             }
             else{
-                sLin += sLetra;
+                sLin = sLin + sLetra;
             }
         }
     }
