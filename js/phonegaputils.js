@@ -42,7 +42,7 @@ var arrayTotal = [];
 var conta =0;
 var textDelArray="";
 var aLin = [];
-
+var fLinea=false;
 
 function resetearValores(){
     objPositionIni=objPositionAct;
@@ -596,7 +596,6 @@ function onError(error) {
     
     function recibirDatoSerial(sDatoSerial){
         var sLetra="";
-        var fLinea=false;
         
         $("#debug1").text(sDatoSerial);
         var sLin="";
