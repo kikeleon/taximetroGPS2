@@ -614,7 +614,7 @@ function onError(error) {
             else{
                 sLin = sLin + sLetra;
             }
-            $("#debug2").text(sLin);
+            //$("#debug2").text(sLin);
         }
     }
     
