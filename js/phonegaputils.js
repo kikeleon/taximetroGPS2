@@ -583,8 +583,8 @@ function onError(error) {
 
     function leerPuerto(){
 
-        //abrirPuertoYleerBuffer();
-        recibirDatoSerial("194  15:12:10.214  24 $GPGSV,1,1,01,20,,,24*7C 195  15:12:10.217  28 $GPGLL,,,,,201210.092,V,N*71");
+        abrirPuertoYleerBuffer();
+        //recibirDatoSerial("194  15:12:10.214  24 $GPGSV,1,1,01,20,,,24*7C 195  15:12:10.217  28 $GPGLL,,,,,201210.092,V,N*71");
     }
     
 
