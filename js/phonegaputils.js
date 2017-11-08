@@ -604,8 +604,10 @@ function onError(error) {
             sLetra = sDatoSerial.substr(i,1);
             if (sLetra ==="$"){
                 if (fLinea){
-                    aLin.push(sLin);
-                    $("#debug2").text(sLin);
+                    if (sLin.substr(0,6)==="$GPRMC"){//Solo agrega al array los Recommended Minimum position data (including position, velocity and time).
+                        aLin.push(sLin);
+                        $("#debug2").text(sLin);
+                    }
                 }
                 sLin="$";
                 fLinea=true;
@@ -619,7 +621,9 @@ function onError(error) {
     }
     
     function mostrarDatosRecibidos(){
-         $("#debug2").text(textDelArray);
+        //$("#debug2").text(textDelArray);
+        $("#latlonIni").text("Inicio en : " + extraerDato(aLin[0],"lat") + " , " + extraerDato(aLin[0],"lon"));
+        $("#latlonAct").text("Actual en : " + extraerDato(aLin[aLin.length-2],"lat") + " , " + extraerDato(aLin[aLin.length-2],"lon"));
     }
 
     function convertirGraaDec(sGradosMinutos, bLatLon){
@@ -643,4 +647,20 @@ function onError(error) {
         }
         retVal=(Number(dd)+(Number(mm)/60)+(Number(ss)/3600));
         return retVal;
+    }
+    
+    function extraeDato(sLinea,sDat){
+        //$GPRMC,013732.000,A,3150.7238,N,11711.7278,E,0.00,0.00,220413,,,A*68
+        var sRetVal="";
+        aTmp=sLinea.split(",");
+        if (sDat==="lat"){
+            sRetVal=aTmp[3];
+        }
+        else if(sDat==="lon"){
+            sRetVal=aTmp[5];
+        }
+        else if(sDat==="tmp"){
+            sRetVal=aTmp[1];
+        }
+        return sRetVal;
     }
