@@ -585,7 +585,7 @@ function onError(error) {
     function leerPuerto(){
 
         abrirPuertoYleerBuffer();
-        //recibirDatoSerial("194  15:12:10.2$14  24 $GPGSV,1,1,01,20,,,$24*7C 195  15:12:10.217  28 $GPGLL,,,,,201210.092,V,N*71");
+        //recibirDatoSerial("194  15:12:10.2$GPRMC,013732.000,A,3150.7238,N,11711.7278,E,0.00,0.00,220413,,,A*6814  24 $GPGSV,1,1,01,20,,,$24*7C 195  15:12:10.217  $GPRMC,013732.000,A,3150.7238,N,11711.7278,E,0.00,0.00,220413,,,A*68 $PGLL,,,,,201210.092,V,N*71");
     }
     
 
@@ -649,7 +649,7 @@ function onError(error) {
         return retVal;
     }
     
-    function extraeDato(sLinea,sDat){
+    function extraerDato(sLinea,sDat){
         //$GPRMC,013732.000,A,3150.7238,N,11711.7278,E,0.00,0.00,220413,,,A*68
         var sRetVal="";
         aTmp=sLinea.split(",");
