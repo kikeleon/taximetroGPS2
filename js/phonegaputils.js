@@ -213,7 +213,7 @@ function mostrar(posicion){
      $("#listening").text("se va a escribir");
      //escribir();
   }
-  ////////////////////////////////////////////////////////////////////////
+  /////////////////GPS EXTERNO/////////////////////////////////
   function mostrarMapa2(posicion){
     var mapurl="img/logo.png";
     var ubicacion=document.getElementById('map');
@@ -378,7 +378,7 @@ function restarFechasEnSegs(hini,hfin){
      return parseFloat(fsumador.toFixed(1));
      
  }
-
+///////////////////////////////////////////////////////
 function getKilometros(lat1,lon1,lat2,lon2){
     var R = 6378.137; //Radio de la tierra en km
     //R = 60000000;//para hacer pruebas
@@ -583,8 +583,8 @@ function onError(error) {
 
     function leerPuerto(){
 
-        abrirPuertoYleerBuffer();
-        //recibirDatoSerial("194  15:12:10.214  24 $GPGSV,1,1,01,20,,,24*7C 195  15:12:10.217  28 $GPGLL,,,,,201210.092,V,N*71");
+        //abrirPuertoYleerBuffer();
+        recibirDatoSerial("194  15:12:10.214  24 $GPGSV,1,1,01,20,,,24*7C 195  15:12:10.217  28 $GPGLL,,,,,201210.092,V,N*71");
     }
     
 
@@ -597,6 +597,7 @@ function onError(error) {
     function recibirDatoSerial(sDatoSerial){
         var sLetra="";
         var fLinea=false;
+        
         $("#debug1").text(sDatoSerial);
         var sLin="";
         for (i=0;i < sDatoSerial.length;i++){
@@ -608,10 +609,12 @@ function onError(error) {
                 }
                 sLin="$";
                 fLinea=true;
+                
             }
             else{
                 sLin = sLin + sLetra;
             }
+            $("#debug2").text(sLin);
         }
     }
     
