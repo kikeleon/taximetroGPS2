@@ -89,7 +89,7 @@
                             function success(data){
                                 var view = new Uint8Array(data);
                                 //$("#debug1").text(uintToString(view));
-                                textDelArray=textDelArray+uintToString(sDatoSerial);
+                                textDelArray=textDelArray+uintToString(view);
                                 recibirDatoSerial(uintToString(view));//recibe el dato del puerto y arma el alim
                                 
                             },
