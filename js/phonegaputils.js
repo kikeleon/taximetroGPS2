@@ -43,6 +43,7 @@ var conta =0;
 var textDelArray="";
 var aLin = [];
 var fLinea=false;
+var sLin="";
 
 function resetearValores(){
     objPositionIni=objPositionAct;
@@ -584,7 +585,7 @@ function onError(error) {
     function leerPuerto(){
 
         abrirPuertoYleerBuffer();
-        //recibirDatoSerial("194  15:12:10.214  24 $GPGSV,1,1,01,20,,,24*7C 195  15:12:10.217  28 $GPGLL,,,,,201210.092,V,N*71");
+        //recibirDatoSerial("194  15:12:10.2$14  24 $GPGSV,1,1,01,20,,,$24*7C 195  15:12:10.217  28 $GPGLL,,,,,201210.092,V,N*71");
     }
     
 
@@ -598,7 +599,7 @@ function onError(error) {
         var sLetra="";
         
         $("#debug1").text(sDatoSerial);
-        var sLin="";
+        
         for (i=0;i < sDatoSerial.length;i++){
             sLetra = sDatoSerial.substr(i,1);
             if (sLetra ==="$"){
