@@ -91,7 +91,7 @@
                                 //$("#debug1").text(uintToString(view));
                                 textDelArray=textDelArray+uintToString(view);
                                 recibirDatoSerial(uintToString(view));//recibe el dato del puerto y arma el alim
-                                
+                                //recibirDatoSerial("$GPRMC,045216.086,V,,,,,0.00,0.00,261017,,,N*442  23:52:15.326  35$GPVTG,0.00,T,,M,0.00,N,0.00,K,N*323  23:52:15.329  24$GPGGA,0");//recibe el dato del puerto y arma el alim
                             },
                             function error(){
                                 new Error("Falla to register read callback");
