@@ -38,9 +38,7 @@ var metMinRegPos=10;//metros minimos para registro de cambio de posicion
 var bPriVez=false;//para saber si ya se obtuvo la primer posicion
 
 //CON GPS USB
-var arrayTotal = [];
-var conta =0;
-var textDelArray="";
+
 var aLin = [];
 var fLinea=false;
 var sLin="";
@@ -48,7 +46,7 @@ var sLin="";
 var sPosIni="";
 var sPosAnt="";
 var sPosAct="";
-
+var bEnganchado = false;// para mostrar mapa y activar botones de envio a internet
 
 
 function resetearValores(){
@@ -72,10 +70,19 @@ function resetearValores(){
     lMovido=false;//controla movimientos de carro;
     metrosCada100=0;
     Unidades=23;
+    //GPSExt
+    bEnganchado=false;
+    aLin = [];
+    fLinea=false;
+    sLin="";
+    sPosIni="";
+    sPosAnt="";
+    sPosAct="";
+    /*
     if (bPriVez){
         mostrarPosiciones();
     }
-    
+    */
 }
 
 function obtener(){
@@ -83,18 +90,18 @@ function obtener(){
     //navigator.geolocation.getCurrentPosition(mostrar,manejoErfileApi
     //ror);
     //
+    
     $("#btnComenzar").buttonMarkup({theme: 'a'});
     $("#btnComenzar").text("Recomenzar");
     resetearValores();
-
-    $("#geolocation").text("obteniendo direccion...");
-    var options = {maximumAge: 60000, timeout: 60000, enableHighAccuracy: true };
     
-    //alert(horIni.toString());
-    //$("#horIni").text(horIni.toString());
-    //ESTO FUNCIONA
-    //watchID = navigator.geolocation.watchPosition(mostrar, manejoError, options);
-    
+    if  ($("#GPSExt").is(':checked')){
+        leerPuerto();
+    }
+    else{
+        var options = {maximumAge: 60000, timeout: 60000, enableHighAccuracy: true };
+        watchID = navigator.geolocation.watchPosition(mostrar, manejoError, options);
+    }
     
     //INICIAR CONTEO DE SEGUNDOS
     window.setInterval(function(){cuentaSegs(); }, 1000);
@@ -120,7 +127,8 @@ function cuentaSegs(){
 
 }
 
-function mostrarMapa(posicion){
+function mostrarMapa(){
+    var posicion = objPositionAct;
     var mapurl="img/logo.png";
     var ubicacion=document.getElementById('map');
 
@@ -155,25 +163,55 @@ function mostrarMapa(posicion){
 
 }
 
-function mostrar(posicion){
+function mostrarMapaGPSExt(){
+    var mapurl="img/logo.png";
+    var ubicacion=document.getElementById('map');
+    //var slat,slon ;
+    
+    sPosIni=extraerDato(aLin[0],"lat")+extraerDato(aLin[0],"lon");
+    sPosAct=extraerDato(aLin[aLin.length-1],"lat")+extraerDato(aLin[aLin.length-1],"lon");
+    
+    //para toglear entre mostrar mapa y datos
+    if (bMostrandoMapa){
+        $("#info").show();
+        $("#btnVerMapa").buttonMarkup({theme: 'b'});
+        $("#btnVerMapa").text("Ver Mapa");
+    }
+    else{
+        $("#info").hide();
+        $("#btnVerMapa").buttonMarkup({theme: 'a'});
+        $("#btnVerMapa").text("Ver Info");
+        ubicacion.innerHTML='<img src="'+mapurl+'">';
+    }
+    bMostrandoMapa=!bMostrandoMapa;
+
+    var slat,slon;
+    slat=extraerDato(sPosAct,"lat");
+    slon=extraerDato(sPosAct,"lon");
+    if ((slat.lenght+slon.lenght)>8){
+        // SE TOMA EL VALOR ACTUAL DE LA POSICION 
+        mapurl='http://maps.google.com/maps/api/staticmap?center='+
+        slat+','+slon+
+        '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+
+        slat+','+slon;
+    }
+}
+
+function mostrar(posicion){//USANDO GPS INTERNEO
     //esto no ha actualizado
-    if (posicion.coords.accuracy<=150){//metMinRegPos*2 para que acepte otras lecturas 
+    if (posicion.coords.accuracy<=metMinRegPos*2){//metMinRegPos*2 para que acepte otras lecturas 
         
         if (!bContaIni){
             horIni= new Date();
             objPositionAnt=posicion;
             objPositionAct=posicion;
             objPositionIni=posicion;
-            $("#horIni").text("Hora Inicio : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());        
             bContaIni = true;
-            losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionIni.coords.latitude),parseFloat(objPositionIni.coords.longitude));
             aLat.push(objPositionIni.coords.latitude);
             aLon.push(objPositionIni.coords.longitude);
         }
         else{
-            //FECHA
             horAct = new Date();
-            $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
             //ACTUALIZA POSICIONES
             objPositionAct=posicion;
             //CALCULA LOS METROS DEL MOVIMIENTO
@@ -182,7 +220,7 @@ function mostrar(posicion){
                 objPositionAnt=objPositionAct;
                 aLat.push(objPositionAct.coords.latitude);
                 aLon.push(objPositionAct.coords.longitude);
-                Unidades+=(losMetros/100);
+                Unidades=Unidades+(losMetros/100);
                 lMovido=true;
                 $("#disRecUlt").text("Ultima Distancia recorrido Valida: " + losMetros.toString() + "mts");
             }
@@ -193,101 +231,78 @@ function mostrar(posicion){
 
         //$("#txtDato").value("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
         }
-        $("#timRec").text(restarFechasEnSegs( horIni, horAct)+" segs");    //$("#geolocation").text("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
+        
         //$("#timRec").text(toString());
-        mostrarPosiciones();
-        if (tieneInternetSN() && $("#verMapa").is(':checked')){
-            mostrarMapa(posicion);
-        }
+        mostrarTodo();
+
     }
     
 }
- function mostrarPosiciones(){
-     $("#latlonIni").text("Inicio en : " + objPositionIni.coords.latitude + " , " + objPositionIni.coords.longitude);
-     $("#latlonAnt").text("Anterior en : " + objPositionAnt.coords.latitude + " , " + objPositionAnt.coords.longitude);
-     $("#latlonAct").text("Actual en : " + objPositionAct.coords.latitude + " , " + objPositionAct.coords.longitude);
-     //$("#disRec").text("Distancia recorrido : " + calcularDistanciaTotal().toString());
-     eldato= calcularDistanciaTotalEnMetros();
-     $("#disRec").text( eldato.toString() +"mts");
-     $("#unidades").text(Unidades.toFixed(1));
-     eldato= calcularValorPorUnidades();
-     $("#valor").text("$"+eldato.toString());
-     
-     eldato=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
-     
-     $("#geolocation").text("Exactitud en medida " + objPositionAct.coords.accuracy);
-     
-     $("#listening").text("se va a escribir");
-     //escribir();
-  }
-  /////////////////GPS EXTERNO/////////////////////////////////
-  function mostrarMapaGPSExt(posicion){
-    var mapurl="img/logo.png";
-    var ubicacion=document.getElementById('map');
-    //var slat,slon ;
-    
-    sPosIni=extraerDato(aLin[0],"lat")+extraerDato(aLin[0],"lon");
-    sPosAct=extraerDato(aLin[aLin.length-1],"lat")+extraerDato(aLin[aLin.length-1],"lon");
-    
-    
-        if ((posicion===null)||(posicion===undefined)){
-            // SE TOMA EL VALOR ACTUAL DE LA POSICION 
-            mapurl='http://maps.google.com/maps/api/staticmap?center='+
-            objPositionAct.coords.latitude+','+objPositionAct.coords.longitude+
-            '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+objPositionAct.coords.latitude+
-            ','+objPositionAct.coords.longitude;
-        }
-        else{
-            mapurl='http://maps.google.com/maps/api/staticmap?center='+
-            posicion.coords.latitude+','+posicion.coords.longitude+
-            '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+posicion.coords.latitude+
-            ','+posicion.coords.longitude;
 
+function mostrarTodo(){
+    var bMostrarMapa = false;
+    var bGpsExterno = false;
+    bMostrarMapa = $("#verMapa").is(':checked');
+    bGpsExterno =$("#GPSExt").is(':checked');
+    if (bGpsExterno){
+
+        if (aLin.length>1){
+            cargarPosicionesGPSExt();//actualiza los valores en sPosIni y sPosAct
+            $("#horIni").text("Hora Inicio : "+extraerDato(aLin[0],"tmp"));
+            $("#horAct").text("Hora Actual : "+extraerDato(aLin[aLin.length-1],"tmp"));
+            $("#latlonIni").text("Inicio en : " + extraerDato(aLin[0],"lat") + " , " + extraerDato(aLin[0],"lon"));
+            $("#latlonAct").text("Actual en : " + extraerDato(aLin[aLin.length-1],"lat") + " , " + extraerDato(aLin[aLin.length-1],"lon"));
+            $("#latlonAnt").text("Anterior en : " + sPosAnt);
+            var losMetros = getMetros(parseFloat(extraerDato(sPosAnt,"lat")),parseFloat(extraerDato(sPosAnt,"lon")),parseFloat(extraerDato(sPosAct,"lat")),parseFloat(extraerDato(sPosAct,"lon")));
+            $("#disRecUlt").text("Ultima Distancia: " + losMetros.toString() + " mts");
+            var losMetros = getMetros(parseFloat(extraerDato(sPosIni,"lat")),parseFloat(extraerDato(sPosIni,"lon")),parseFloat(extraerDato(sPosAct,"lat")),parseFloat(extraerDato(sPosAct,"lon")));
+            $("#disRec").text(losMetros.toString() + " mts");
+            $("#timRec").text(obtenerTiempoRecorrido());
+            $("#unidades").text(Unidades.toFixed(1));
+            eldato= calcularValorPorUnidades();
+            $("#valor").text("$"+eldato.toString());
         }
-    //para toglear entre mostrar mapa y datos
-    if (bMostrandoMapa){
-        $("#info").show();
-        $("#btnVerMapa").buttonMarkup({theme: 'b'});
-        $("#btnVerMapa").text("Ver Mapa");
     }
     else{
-        $("#info").hide();
-        $("#btnVerMapa").buttonMarkup({theme: 'a'});
-        $("#btnVerMapa").text("Ver Info");
-        ubicacion.innerHTML='<img src="'+mapurl+'">';
-    }
-    bMostrandoMapa=!bMostrandoMapa;
-
-
-}
-
-function mostrarGPSExt(){
-    //esto no ha actualizado
-    if (aLin.length>1){
-        cargarPosiciones();//actualiza los valores en sPosIni y sPosAct
-        $("#horIni").text("Hora Inicio : "+extraerDato(aLin[0],"tmp"));
-        $("#horAct").text("Hora Actual : "+extraerDato(aLin[aLin.length-1],"tmp"));
-        var losMetros = getMetros(parseFloat(extraerDato(sPosAnt,"lat")),parseFloat(extraerDato(sPosAnt,"lon")),parseFloat(extraerDato(sPosAct,"lat")),parseFloat(extraerDato(sPosAct,"lon")));
-        $("#disRecUlt").text("Ultima Distancia: " + losMetros.toString() + " mts");
-        var losMetros = getMetros(parseFloat(extraerDato(sPosIni,"lat")),parseFloat(extraerDato(sPosIni,"lon")),parseFloat(extraerDato(sPosAct,"lat")),parseFloat(extraerDato(sPosAct,"lon")));
-        $("#disRec").text(losMetros.toString() + " mts");
-        $("#timRec").text(obtenerTiempoRecorrido());
-        
-
+        if (aLat.length>1){//aseguramos que el arreglo tenga al menos dos medidas comparativas
+            $("#horIni").text("Hora Inicio : "+horIni.getHours()+":"+horIni.getMinutes()+":"+horIni.getSeconds());
+            $("#horAct").text("Hora Actual : "+horAct.getHours()+":"+horAct.getMinutes()+":"+horAct.getSeconds());
+            $("#latlonIni").text("Inicio en : " + objPositionIni.coords.latitude + " , " + objPositionIni.coords.longitude);
+            $("#latlonAnt").text("Anterior en : " + objPositionAnt.coords.latitude + " , " + objPositionAnt.coords.longitude);
+            $("#latlonAct").text("Actual en : " + objPositionAct.coords.latitude + " , " + objPositionAct.coords.longitude);
+            
+            losMetros=getMetros(parseFloat(objPositionAct.coords.latitude),parseFloat(objPositionAct.coords.longitude),parseFloat(objPositionAnt.coords.latitude),parseFloat(objPositionAnt.coords.longitude));
+            $("#disRecUlt").text(losMetros);
+            losMetros= calcularDistanciaTotalEnMetros();
+            $("#disRec").text( losMetros.toString() +"mts");
+            $("#unidades").text(Unidades.toFixed(1));
+            eldato= calcularValorPorUnidades();
+            $("#valor").text("$"+eldato.toString());
+            $("#geolocation").text("Exactitud en medida " + objPositionAct.coords.accuracy);
+            ///TIEMPOS
+            $("#timRec").text(restarFechasEnSegs( horIni, horAct)+" segs");    //$("#geolocation").text("Latitud :" + posicion.coords.latitude + " - Longitud :" +posicion.coords.longitude);
         }
-     
-    
-    if (tieneInternetSN() && $("#verMapa").is(':checked')){
-        //mostrarMapaGPSExt();
-    }
+        else{
+            $("#listening").text("Esperando segunda lectura");
+        }
         
+    }
+    if (tieneInternetSN() && bMostrarMapa ){
+        if (!bGpsExterno){
+            mostrarMapa();
+        }
+        else{
+            mostrarMapaGPSExt();
+        }
+    }
 }
 
-function cargarPosiciones(){
+/////////////////GPS EXTERNO/////////////////////////////////
+ 
+
+function cargarPosicionesGPSExt(){
     sPosIni="";
-    
     sPosAct="";
-    
     sPosIni=aLin[0];
     sPosAct=aLin[aLin.length-1];
     
@@ -352,7 +367,7 @@ function restarFechasEnSegs(hini,hfin){
         
      else{
         retVal=Unidades*valorUnidad;
-        if (horAct.getHours()>20) retVal+=recNoct;
+        if (horAct.getHours()>20) retVal=retVal+recNoct;
      } 
 
     //parseFloat(retVal.toFixed(3));
@@ -369,7 +384,19 @@ function restarFechasEnSegs(hini,hfin){
      return parseFloat(fsumador.toFixed(1));
      
  }
-///////////////////////////////////////////////////////
+
+ function calcularDistanciaTotalEnMetrosGPSExt(){
+     
+     fsumador=0;
+     //return getKilometros(4.59488357,-74.15688198,4.6261026,-74.1476059);
+     for (i = 1; i < aLat.length; i++) {
+         
+         fsumador = fsumador + getMetros(parseFloat(extraerDato(aLin[i-1],"lat")),parseFloat(extraerDato(aLin[i-1],"lon")),parseFloat(extraerDato(aLin[i],"lat")),parseFloat(extraerDato(aLin[i-1],"lat")));
+     }
+     return parseFloat(fsumador.toFixed(1));
+     
+ }
+
 function getKilometros(lat1,lon1,lat2,lon2){
     var R = 6378.137; //Radio de la tierra en km
     //R = 60000000;//para hacer pruebas
@@ -607,18 +634,18 @@ function onError(error) {
                             sPosAct=sLin;
                             sPosAnt=aLin[aLin.length-1];
                             sLatAnt = extraerDato(sPosAnt,"lat");
-                            sLonAnt = convertirGraaDec(extraerDato(aLin[aLin.length-1],"lon"),false);
-                            sLatAct = convertirGraaDec(extraerDato(sLin,"lat"),true);
+                            sLonAnt = extraerDato(aLin[aLin.length-1],"lon");
+                            sLatAct = extraerDato(sLin,"lat");
                             sLonAct = extraerDato(sLin,"lon");
                             losMetros = getMetros(Number(sLatAnt),Number(sLonAnt),Number(sLatAct),Number(sLonAct));
                             if (losMetros>metMinRegPos){
                                 aLin.push(sLin);
-                                
+                                Unidades=Unidades+(losMetros/100);
+                                lMovido=true;
                             }
-                            
-                            mostrarDatosRecibidos();
-                            mostrarGPSExt();
+                            mostrarTodo();
                         }
+                        bEnganchado = true;
                     }
                 }
                 sLin="$";
@@ -632,13 +659,6 @@ function onError(error) {
         }
     }
     
-    function mostrarDatosRecibidos(){
-        //$("#debug2").text(textDelArray);
-        $("#latlonIni").text("Inicio en : " + extraerDato(aLin[0],"lat") + " , " + extraerDato(aLin[0],"lon"));
-        $("#latlonAct").text("Actual en : " + extraerDato(aLin[aLin.length-1],"lat") + " , " + extraerDato(aLin[aLin.length-1],"lon"));
-        //$("#disRecUlt").text("Ultima Distancia recorrido Valida: " + losMetros.toString() + "mts");
-    }
-
     function convertirGraaDec(sGradosMinutos, bLatLon){
         /*
          * 
@@ -670,9 +690,7 @@ function onError(error) {
         var sRetVal="";
         aTmp=sLinea.split(",");
         if (sDat==="lat"){
-            
             sRetVal=convertirGraaDec(aTmp[3],true);
-            
             if (aTmp[3]==="S"){
                 sRetVal="-"+sRetVal;
             }
