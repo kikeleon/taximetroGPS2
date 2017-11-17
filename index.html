@@ -49,7 +49,8 @@
     <script src="js/phonegaputils.js"></script>
 
     <script>
-
+        var textDelArray ="";//almacena todo lo recibido
+        
         
     function xx(){
         $("#geolocation").text("obteniendo direccion...");
@@ -88,13 +89,13 @@
                         serial.registerReadCallback(
                             function success(data){
                                 var view = new Uint8Array(data);
-                                //$("#debug1").text(uintToString(view));
-                                textDelArray=textDelArray+uintToString(view);
-                                recibirDatoSerial(uintToString(view));//recibe el dato del puerto y arma el alim
-                                //recibirDatoSerial("$GPRMC,045216.086,V,,,,,0.00,0.00,261017,,,N*442  23:52:15.326  35$GPVTG,0.00,T,,M,0.00,N,0.00,K,N*323  23:52:15.329  24$GPGGA,0");//recibe el dato del puerto y arma el alim
+                                var sView = uintToString(view);
+                                $("#debug1").text(sView);
+                                textDelArray=textDelArray+sView;
+                                recibirDatoSerial(sView);//recibe el dato del puerto y arma el alim
                             },
                             function error(){
-                                new Error("Falla to register read callback");
+                                new Error("Falla al registrar el puerto serial");
                             });
                     },
                     errorCallback
@@ -126,10 +127,12 @@
 
             </div>
             <div id="info">
-                <input type="button" value="Obtener" id="btnobtener" onclick="obtener();">
                 <h1 id="txtDato">----</h1>
                 <fieldset data-role="controlgroup">
-                <legend>Seleccion si desea ver el mapa:</legend>
+                    <label for="GPSExt">GPS Externo</label>
+                    <input type="checkbox" name="GPSExt" id="GPSExt" value="GPSExt" checked>
+                </fieldset>
+                <fieldset data-role="controlgroup">
                     <label for="verMapa">Ver mapa</label>
                     <input type="checkbox" name="verMapa" id="verMapa" value="verMapa">
                 </fieldset>
