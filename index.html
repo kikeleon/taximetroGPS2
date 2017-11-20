@@ -40,7 +40,7 @@
     
     <!-- Include jQuery Mobile stylesheets -->
   
-    <link rel="stylesheet" href="css/didacta.min.css" />
+    <link rel="stylesheet" href="css/didacta.css" />
     <link rel="stylesheet" href="css/jquery.mobile.icons.min.css" />
     <link rel="stylesheet" href="css/jquery.mobile.structure-1.4.5.min.css"/>
     <link rel="stylesheet" href="css/index.css"/> 
@@ -49,12 +49,8 @@
     <script src="js/phonegaputils.js"></script>
 
     <script>
-
+        var textDelArray ="";//almacena todo lo recibido
         
-    function xx(){
-        $("#geolocation").text("obteniendo direccion...");
-    }
-    
     function abrirPuertoYleerBuffer(){
         var errorCallback = 
         function(message) {
@@ -88,13 +84,13 @@
                         serial.registerReadCallback(
                             function success(data){
                                 var view = new Uint8Array(data);
-                                //$("#debug1").text(uintToString(view));
-                                textDelArray=textDelArray+uintToString(view);
-                                recibirDatoSerial(uintToString(view));//recibe el dato del puerto y arma el alim
-                                
+                                var sView = uintToString(view);
+                                //$("#debug1").text(sView);
+                                textDelArray=textDelArray+sView;
+                                recibirDatoSerial(sView);//recibe el dato del puerto y arma el alim
                             },
                             function error(){
-                                new Error("Falla to register read callback");
+                                new Error("Falla al registrar el puerto serial");
                             });
                     },
                     errorCallback
@@ -116,7 +112,7 @@
         }); 
     </script>
     <div class="app">
-        <div data-role="page" data-theme="b">
+        <div data-role="page" data-theme="a">
             <div id="encabezado" data-role="header" data-position="fixed" >
                 <a href="javascript:obtener();" class="ui-btn ui-corner-all ui-shadow ui-icon-home ui-btn-icon-left" id="btnComenzar">Comenzar</a>
                 <h1>espaciointernet spectrum</h1>
@@ -126,13 +122,19 @@
 
             </div>
             <div id="info">
-                <input type="button" value="Obtener" id="btnobtener" onclick="obtener();">
-                <h1 id="txtDato">----</h1>
-                <fieldset data-role="controlgroup">
-                <legend>Seleccion si desea ver el mapa:</legend>
+                <div id="cargando" style="display: none;" >
+                    <img src="cargando.gif" id="imgcargando" alt="cargando">
+                    <strong id="textocargando">Cargando...</strong>
+                </div>
+                <fieldset data-role="controlgroup" data-type="horizontal" data-mini="true">
+                    <label for="GPSExt">GPS Externo</label>
+                    <input type="checkbox" name="GPSExt" id="GPSExt" value="GPSExt" checked>
                     <label for="verMapa">Ver mapa</label>
                     <input type="checkbox" name="verMapa" id="verMapa" value="verMapa">
+                    <label for="envDatos">Enviar posiciones</label>
+                    <input type="checkbox" name="envDatos" id="envDatos" value="envDatos" disabled>
                 </fieldset>
+
                 <p id="geolocation">Watching geolocation...</p>
                 <p id="latlonIni">Inicio en Latitud, Longitud</p>
                 <p id="horIni">Hora de Inicio:</p>
