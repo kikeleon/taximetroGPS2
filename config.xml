@@ -31,7 +31,7 @@
     <plugin name="cordova-plugin-vibration" source="npm" spec="~2.1.0" />
     <plugin name="cordova-plugin-whitelist" source="npm" spec="~1.2.1" />
     <plugin name="cordova-plugin-serial" source="npm" />
-    <plugin name="InAppBrowser" value="org.apache.cordova.InAppBrowser" />
+    <plugin name="cordova-plugin-InAppBrowser" value="org.apache.cordova.InAppBrowser" />
     
     <platform name="android">
         
