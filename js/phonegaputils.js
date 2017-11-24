@@ -706,4 +706,9 @@ function onError(error) {
      $("#geolocation").text(errortmp);
 }
 
-
+function verBrowser(){
+    var ref = window.open('http://espaciointernet.com/trabajos/taxiterminal/mapa7.php?dirLoc=bogota&zoo=12&lat=4.6261026&lng=-74.1476059&latori=4.6261026&lngori=-74.1476059&wid=400&hei=400', '_blank', 'location=yes');
+    var myCallback = function() { alert(event.url); }
+    ref.addEventListener('loadstart', myCallback);
+    ref.removeEventListener('loadstart', myCallback);
+}
