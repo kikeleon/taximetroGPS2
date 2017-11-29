@@ -33,7 +33,8 @@ var valorUnidad=83;
 var bMostrandoMapa=false;
 var averageProm;
 
-var metMinRegPos=10;//metros minimos para registro de cambio de posicion
+//var metMinRegPos=151;//metros minimos para registro de cambio de posicion
+var metMinRegPos=1;
 
 var bPriVez=false;//para saber si ya se obtuvo la primer posicion
 
@@ -48,6 +49,11 @@ var sPosAnt="";
 var sPosAct="";
 var bEnganchado = false;// para mostrar mapa y activar botones de envio a internet
 
+var bMostrarMapa = false;
+var bGpsExterno = false;
+
+var iZoom=12;
+
 function resetearValores(){
     objPositionIni=objPositionAct;
     objPositionAnt=objPositionAct;
@@ -61,7 +67,6 @@ function resetearValores(){
     aLon.length=0;
     millisegsIni=0;
     millisegsAct =0;
-    bContaIni = false;
     fsumador=0;
     ftemp=0;
     segsSinMov=0;// para llevar el tiempo sin movimiento, se suma una unidad
@@ -82,23 +87,21 @@ function resetearValores(){
         mostrarPosiciones();
     }
     */
+    bMostrarMapa = $("#verMapa").is(':checked');
+    bGpsExterno =$("#GPSExt").is(':checked');
 }
 function obtener(){
-    //navigator.geolocation.getCurrentPosition(mostrar, gestionarErrores);
-    //navigator.geolocation.getCurrentPosition(mostrar,manejoErfileApi
-    //ror);
+    //REINICIA COMPLETAMENTE EL CICLO
     //
-    
+    resetearValores();
+
     $("#btnComenzar").buttonMarkup({theme: 'a'});
     $("#btnComenzar").text("Recomenzar");
-    if (!bEnganchado){
-        $("#cargando").show(1000);
-        $("#textocargando").text("Enganchando GPS...");
-    }
+
+    $("#cargando").show(1000);
+    $("#textocargando").text("Enganchando GPS...");
     
-    resetearValores();
-    
-    if  ($("#GPSExt").is(':checked')){
+    if  (bGpsExterno){
         leerPuerto();
     }
     else{
@@ -134,6 +137,9 @@ function mostrar(posicion){//USANDO GPS INTERNEO
         if (!bEnganchado){
             bEnganchado = true;
             $("#cargando").hide(1000);
+            if (tieneInternetSN() && bMostrarMapa )
+                iniMapa(posicion.coords.latitude,posicion.coords.longitude,iZoom);//crea el mapa cuando esta enganchado
+            
         }
 
         if (!bContaIni){
@@ -168,16 +174,16 @@ function mostrar(posicion){//USANDO GPS INTERNEO
         }
         
         //$("#timRec").text(toString());
-        mostrarTodo();
+        if (aLat.length>0){//ya tiene por lo menos dos puntos para marcar
+            mostrarTodo();
+        }
 
     }
     
 }
 function mostrarTodo(){
-    var bMostrarMapa = false;
-    var bGpsExterno = false;
-    bMostrarMapa = $("#verMapa").is(':checked');
-    bGpsExterno =$("#GPSExt").is(':checked');
+
+
     if (bGpsExterno){
 
         if (aLin.length>1){
@@ -222,11 +228,15 @@ function mostrarTodo(){
         
     }
     if (tieneInternetSN() && bMostrarMapa ){
-        if (!bGpsExterno){
-            mostrarMapa();
+        if (bGpsExterno){
+             if (aLin.length>1){
+                  crearMarca(extraerDato(aLin[aLin.length-1],"lat"),extraerDato(aLin[aLin.length-1],"lon"));
+             }
         }
         else{
-            mostrarMapaGPSExt();
+            if (aLat.length>1){
+                crearMarca(objPositionAct.coords.latitude,objPositionAct.coords.longitude);
+            }
         }
     }
 }
@@ -271,6 +281,7 @@ function recibirDatoSerial(sDatoSerial){
                             sPosAct=sLin;
                             sPosAnt=sLin;
                             aLin.push(sLin);//se agrega el primer registro
+                            iniMapa(extraerDato(sLin,"lat"),extraerDato(sLin,"lon"),iZoom);//crea el mapa cuando esta enganchado
                         }
                         else if (aLin.length>0){//indica que ya hay mas de un dato GPRMC
                             sPosIni=aLin[0];
@@ -616,13 +627,13 @@ function mostrarMapa(){
             objPositionAct.coords.latitude+','+objPositionAct.coords.longitude+
             '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+objPositionAct.coords.latitude+
             ','+objPositionAct.coords.longitude;
+            
         }
         else{
             mapurl='http://maps.google.com/maps/api/staticmap?center='+
             posicion.coords.latitude+','+posicion.coords.longitude+
             '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+posicion.coords.latitude+
             ','+posicion.coords.longitude;
-
         }
     //para toglear entre mostrar mapa y datos
     if (bMostrandoMapa){
@@ -673,6 +684,7 @@ function mostrarMapaGPSExt(){
         slat+','+slon;
     }
 }
+
 function coordenadas(position) {
       var lat = position.coords.latitude;
       var lon = position.coords.longitude;
@@ -708,7 +720,7 @@ function onError(error) {
 
 function verBrowser(){
     var ref = window.open('http://espaciointernet.com/trabajos/taxiterminal/mapa7.php?dirLoc=bogota&zoo=12&lat=4.6261026&lng=-74.1476059&latori=4.6261026&lngori=-74.1476059&wid=400&hei=400', '_blank', 'location=yes');
-    var myCallback = function() { alert(event.url); }
+    var myCallback = function() { alert(event.url); };
     ref.addEventListener('loadstart', myCallback);
     ref.removeEventListener('loadstart', myCallback);
 }
