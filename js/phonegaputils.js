@@ -48,6 +48,10 @@ var sPosAnt="";
 var sPosAct="";
 var bEnganchado = false;// para mostrar mapa y activar botones de envio a internet
 
+var bMostrarMapa = false;
+var bGpsExterno = false;
+
+var iZoom=12;
 
 function resetearValores(){
     objPositionIni=objPositionAct;
@@ -62,7 +66,6 @@ function resetearValores(){
     aLon.length=0;
     millisegsIni=0;
     millisegsAct =0;
-    bContaIni = false;
     fsumador=0;
     ftemp=0;
     segsSinMov=0;// para llevar el tiempo sin movimiento, se suma una unidad
@@ -83,19 +86,21 @@ function resetearValores(){
         mostrarPosiciones();
     }
     */
+    bMostrarMapa = $("#verMapa").is(':checked');
+    bGpsExterno =$("#GPSExt").is(':checked');
 }
-
 function obtener(){
-    //navigator.geolocation.getCurrentPosition(mostrar, gestionarErrores);
-    //navigator.geolocation.getCurrentPosition(mostrar,manejoErfileApi
-    //ror);
+    //REINICIA COMPLETAMENTE EL CICLO
     //
-    
+    resetearValores();
+
     $("#btnComenzar").buttonMarkup({theme: 'a'});
     $("#btnComenzar").text("Recomenzar");
-    resetearValores();
+
+    $("#cargando").show(1000);
+    $("#textocargando").text("Enganchando GPS...");
     
-    if  ($("#GPSExt").is(':checked')){
+    if  (bGpsExterno){
         leerPuerto();
     }
     else{
@@ -106,7 +111,6 @@ function obtener(){
     //INICIAR CONTEO DE SEGUNDOS
     window.setInterval(function(){cuentaSegs(); }, 1000);
 }
-
 function cuentaSegs(){
     iSegs+=1;    
     if (!lMovido){
@@ -126,81 +130,17 @@ function cuentaSegs(){
     }
 
 }
-
-function mostrarMapa(){
-    var posicion = objPositionAct;
-    var mapurl="img/logo.png";
-    var ubicacion=document.getElementById('map');
-
-        if ((posicion===null)||(posicion===undefined)){
-            // SE TOMA EL VALOR ACTUAL DE LA POSICION 
-            mapurl='http://maps.google.com/maps/api/staticmap?center='+
-            objPositionAct.coords.latitude+','+objPositionAct.coords.longitude+
-            '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+objPositionAct.coords.latitude+
-            ','+objPositionAct.coords.longitude;
-        }
-        else{
-            mapurl='http://maps.google.com/maps/api/staticmap?center='+
-            posicion.coords.latitude+','+posicion.coords.longitude+
-            '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+posicion.coords.latitude+
-            ','+posicion.coords.longitude;
-
-        }
-    //para toglear entre mostrar mapa y datos
-    if (bMostrandoMapa){
-        $("#info").show();
-        $("#btnVerMapa").buttonMarkup({theme: 'b'});
-        $("#btnVerMapa").text("Ver Mapa");
-    }
-    else{
-        $("#info").hide();
-        $("#btnVerMapa").buttonMarkup({theme: 'a'});
-        $("#btnVerMapa").text("Ver Info");
-        ubicacion.innerHTML='<img src="'+mapurl+'">';
-    }
-    bMostrandoMapa=!bMostrandoMapa;
-
-
-}
-
-function mostrarMapaGPSExt(){
-    var mapurl="img/logo.png";
-    var ubicacion=document.getElementById('map');
-    //var slat,slon ;
-    
-    sPosIni=extraerDato(aLin[0],"lat")+extraerDato(aLin[0],"lon");
-    sPosAct=extraerDato(aLin[aLin.length-1],"lat")+extraerDato(aLin[aLin.length-1],"lon");
-    
-    //para toglear entre mostrar mapa y datos
-    if (bMostrandoMapa){
-        $("#info").show();
-        $("#btnVerMapa").buttonMarkup({theme: 'b'});
-        $("#btnVerMapa").text("Ver Mapa");
-    }
-    else{
-        $("#info").hide();
-        $("#btnVerMapa").buttonMarkup({theme: 'a'});
-        $("#btnVerMapa").text("Ver Info");
-        ubicacion.innerHTML='<img src="'+mapurl+'">';
-    }
-    bMostrandoMapa=!bMostrandoMapa;
-
-    var slat,slon;
-    slat=extraerDato(sPosAct,"lat");
-    slon=extraerDato(sPosAct,"lon");
-    if ((slat.lenght+slon.lenght)>8){
-        // SE TOMA EL VALOR ACTUAL DE LA POSICION 
-        mapurl='http://maps.google.com/maps/api/staticmap?center='+
-        slat+','+slon+
-        '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+
-        slat+','+slon;
-    }
-}
-
 function mostrar(posicion){//USANDO GPS INTERNEO
     //esto no ha actualizado
     if (posicion.coords.accuracy<=metMinRegPos*2){//metMinRegPos*2 para que acepte otras lecturas 
-        
+        if (!bEnganchado){
+            bEnganchado = true;
+            $("#cargando").hide(1000);
+            if (tieneInternetSN() && bMostrarMapa )
+                iniMapa(posicion.coords.latitude,posicion.coords.longitude,iZoom);//crea el mapa cuando esta enganchado
+            
+        }
+
         if (!bContaIni){
             horIni= new Date();
             objPositionAnt=posicion;
@@ -233,17 +173,16 @@ function mostrar(posicion){//USANDO GPS INTERNEO
         }
         
         //$("#timRec").text(toString());
-        mostrarTodo();
+        if (aLat.length>0){//ya tiene por lo menos dos puntos para marcar
+            mostrarTodo();
+        }
 
     }
     
 }
-
 function mostrarTodo(){
-    var bMostrarMapa = false;
-    var bGpsExterno = false;
-    bMostrarMapa = $("#verMapa").is(':checked');
-    bGpsExterno =$("#GPSExt").is(':checked');
+
+
     if (bGpsExterno){
 
         if (aLin.length>1){
@@ -288,18 +227,19 @@ function mostrarTodo(){
         
     }
     if (tieneInternetSN() && bMostrarMapa ){
-        if (!bGpsExterno){
-            mostrarMapa();
+        if (bGpsExterno){
+             if (aLin.length>1){
+                  crearMarca(extraerDato(aLin[aLin.length-1],"lat"),extraerDato(aLin[aLin.length-1],"lon"));
+             }
         }
         else{
-            mostrarMapaGPSExt();
+            if (aLat.length>1){
+                crearMarca(objPositionAct.coords.latitude,objPositionAct.coords.longitude);
+            }
         }
     }
 }
-
-/////////////////GPS EXTERNO/////////////////////////////////
- 
-
+/////GPS EXTERNO///////////
 function cargarPosicionesGPSExt(){
     sPosIni="";
     sPosAct="";
@@ -307,7 +247,6 @@ function cargarPosicionesGPSExt(){
     sPosAct=aLin[aLin.length-1];
     
 }
-  
 function calcularDistanciaTotalEnMetrosGPSExt(){
      
     fsumador=0;
@@ -318,20 +257,139 @@ function calcularDistanciaTotalEnMetrosGPSExt(){
     return parseFloat(fsumador.toFixed(1));
      
  }
-  
-  
+function leerPuerto(){
+       abrirPuertoYleerBuffer();
+       //recibirDatoSerial("194  15:12:10.2$GPRMC,200414.000,A,0438.1299,N,07408.9062,W,0.00,285.72,131117,,,A*7B50  15:04:14.383  37$GPRMC,200414.000,A,0438.1400,N,07408.9300,W,0.00,285.72,131117,,,A*7B50  15:04:14.383  37$PGLL,,,,,201210.092,V,N*71");
+    }
+function uintToString(uintArray) {
+        var encodedString = String.fromCharCode.apply(null, uintArray),
+            decodedString = decodeURIComponent(escape(encodedString));
+        return decodedString;
+    }
+function recibirDatoSerial(sDatoSerial){
+        var sLetra="";
+      
+        for (i=0;i < sDatoSerial.length;i++){
+            sLetra = sDatoSerial.substr(i,1);
+            if (sLetra ==="$"){
+                if (fLinea){
+                    if (sLin.substr(0,6)==="$GPRMC" && sLin.substr(18,1)==="A"){//Solo agrega al array los Recommended Minimum position data (including position, velocity and time).
+                        $("#debug2").text(sLin);
+                        if (aLin.length===0){
+                            sPosIni=sLin;
+                            sPosAct=sLin;
+                            sPosAnt=sLin;
+                            aLin.push(sLin);//se agrega el primer registro
+                            iniMapa(extraerDato(sLin,"lat"),extraerDato(sLin,"lon"),iZoom);//crea el mapa cuando esta enganchado
+                        }
+                        else if (aLin.length>0){//indica que ya hay mas de un dato GPRMC
+                            sPosIni=aLin[0];
+                            sPosAct=sLin;
+                            sPosAnt=aLin[aLin.length-1];
+                            sLatAnt = extraerDato(sPosAnt,"lat");
+                            sLonAnt = extraerDato(aLin[aLin.length-1],"lon");
+                            sLatAct = extraerDato(sLin,"lat");
+                            sLonAct = extraerDato(sLin,"lon");
+                            losMetros = getMetros(Number(sLatAnt),Number(sLonAnt),Number(sLatAct),Number(sLonAct));
+                            if (losMetros>metMinRegPos){
+                                aLin.push(sLin);
+                                Unidades=Unidades+(losMetros/100);
+                                lMovido=true;
+                            }
+                            mostrarTodo();
+                        }
+                        if (!bEnganchado){
+                            bEnganchado = true;
+                            $("#cargando").hide(1000);
+                        }
+                    }
+                }
+                sLin="$";
+                fLinea=true;
+                
+            }
+            else{
+                sLin = sLin + sLetra;
+            }
+            //$("#debug2").text(sLin);
+        }
+    }
+function convertirGraaDec(sGradosMinutos, bLatLon){
+        /*
+         * 
+         * (23° 08' 06'' N) = (23 + (08 / 60) + (06 / 3600)) = 23.134999
+         */
+        var dd="";
+        var mm="";
+        //var ss="";
+        var retVal=0;
+        
+        if (bLatLon){//si es verdadeso saca Latitud ddmm.ssss
+            dd=sGradosMinutos.substr(0, 2);
+            mm=sGradosMinutos.substr(2, 7);
+            //ss=sGradosMinutos.substr(5, 4);
+        }//longitud dddmm.ssss
+        else{
+            dd=sGradosMinutos.substr(0, 3);
+            mm=sGradosMinutos.substr(3, 7);
+            //ss=sGradosMinutos.substr(6, 4);
+            
+        }
+        retVal=Number(dd)+(Number(mm)/60);
+        return retVal.toString();
+    }
+function extraerDato(sLinea,sDat){
+        //EXTRAE EL DATO Y LO FORMATEA RETORNA STRINGS
+        //$GPRMC,013732.000,A,3150.7238,N,11711.7278,E,0.00,0.00,220413,,,A*68
+        var sRetVal="";
+        aTmp=sLinea.split(",");
+        if (sDat==="lat"){
+            sRetVal=convertirGraaDec(aTmp[3],true);
+            if (aTmp[3]==="S"){
+                sRetVal="-"+sRetVal;
+            }
+        }
+        else if(sDat==="lon"){
+            sRetVal=convertirGraaDec(aTmp[5],false);
+            if (aTmp[6]==="W"){
+                sRetVal="-"+sRetVal;
+            }
+        }
+        else if(sDat==="tmp"){
+            //hhmmss.sss
+            shhmmss=aTmp[1];
+            //ddmmyyyy
+            sddmmyyyy=aTmp[9];
+            sRetVal=sddmmyyyy.substr(0,2)+"/"+sddmmyyyy.substr(2,2)+"/"+sddmmyyyy.substr(4,4);
+            sRetVal= sRetVal + " " +shhmmss.substr(0,2)+":"+shhmmss.substr(2,2)+":"+shhmmss.substr(4,2);
+        }
+        else if(sDat==="val"){
+            sRetVal=aTmp[2];
+        }
+        return sRetVal;
+    }
+function obtenerTiempoRecorrido(){
+    var dIni = "";
+    var dFin = "";
+    var segs = "";
+    if (aLin.length>1){
+        dIni = new Date(extraerDato(aLin[0],"tmp"));
+        dFin = new Date(extraerDato(aLin[aLin.length-1],"tmp"));
+        segs = restarFechasEnSegs(dIni,dFin);
+    }
+    return segs;
+ }
+//////FUNCIONES VARIAS//////////////////
 function restarFechasEnSegs(hini,hfin){
     millisegsIni = hini.getTime();
     millisegsAct = hfin.getTime();
     return (millisegsAct - millisegsIni)/1000;
 }
-
  function manejoError(error){
     var errortmp="";
     errortmp = 'error geolocaliza code: '  + error.code + 'message: ' + error.message ;
      $("#geolocation").text(errortmp);
  }
-
  function tieneInternetSN(){
      /*retorna Si tiene internet los siguientes numeros*
       * 1-desconocido
@@ -351,15 +409,16 @@ function restarFechasEnSegs(hini,hfin){
      /*if ((retCon === 2) || (retCon === 3) || (retCon === 4) || (retCon === 5) || (retCon === 6) || (retCon === 7)){
          internetSN = true;
      }*/
-    if ((retCon !== "UNKNOWN") || (retCon !== "NONE"))
+    if ((retCon !== "UNKNOWN") || (retCon !== "NONE")){
         internetSN = true;
-    else
+        $('#envDatos').attr("disabled", false);
+    }
+    else{
         internetSN = false;
-    return internetSN;
+        $('#envDatos').attr("disabled", true);
+    }
+     return internetSN;
  }
- 
-
- 
  function calcularValorPorUnidades(){
      var retVal=0;
      horAct = new Date();
@@ -373,7 +432,6 @@ function restarFechasEnSegs(hini,hfin){
     //parseFloat(retVal.toFixed(3));
     return parseInt(retVal);
  }
- 
  function calcularDistanciaTotalEnMetros(){
      
      fsumador=0;
@@ -384,7 +442,6 @@ function restarFechasEnSegs(hini,hfin){
      return parseFloat(fsumador.toFixed(1));
      
  }
-
  function calcularDistanciaTotalEnMetrosGPSExt(){
      
      fsumador=0;
@@ -396,7 +453,6 @@ function restarFechasEnSegs(hini,hfin){
      return parseFloat(fsumador.toFixed(1));
      
  }
-
 function getKilometros(lat1,lon1,lat2,lon2){
     var R = 6378.137; //Radio de la tierra en km
     //R = 60000000;//para hacer pruebas
@@ -408,7 +464,6 @@ function getKilometros(lat1,lon1,lat2,lon2){
     return d.toFixed(3); //Retorna tres decimales
     //return R;
 }
-
 function getMetros(lat1,lon1,lat2,lon2){
     var R = 6378137; //Radio de la tierra en mts
     //R = 60000000;//para hacer pruebas
@@ -420,11 +475,70 @@ function getMetros(lat1,lon1,lat2,lon2){
     return parseFloat(d.toFixed(3)); //Retorna tres decimales
     //return R;
 }
-
 function rads(x){
     return x*Math.PI/180;
 }
+//////FUNCIONES DE ESCRITURA DE DISCO//////////
+function gotFS(fileSystem) {
+    fileSystem.root.getDirectory("DO_NOT_DELETE", 
+        {create: true, exclusive: false}, 
+        gotDirEntry, 
+        fail);
+}
+function gotDirEntry(dirEntry) {
+    dir = dirEntry;
+    dirEntry.getFile(nomArchivoTexto, 
+        {create: false, exclusive: false}, 
+        readSuccess, 
+        fileDonotexist);
+}
+function fileDonotexist(dirEntry) {
+    dir.getFile(nomArchivoTexto, 
+        {create: true, exclusive: false}, 
+        gotFileEntry, 
+        fail);
+}
+function gotFileEntry(fileEntryWrite) {
+    $("#listening").text("gotFileEntry");
+    fileEntryWrite.createWriter(gotFileWriter, fail);
+}
+function gotFileWriter(writer) {
+    $("#listening").text("gotFileWriter");
+    writer.onerror = function(evt) {
+    };
+    writer.write("algo");
+    writer.onwriteend = function(evt) {
+        dir.getFile(nomArchivoTexto, 
+            {create: false, exclusive: false}, 
+            readSuccess, 
+            fail);
+    };
+}
+function readSuccess(fileE) {
+    fileE.file(readAsText, fail);
+    $("#listening").text("readSuccess");
+}
+function fail(error) {
+    $("#listening").text("error nume: "+ error.code);
+}
+function readAsText(readerDummy) {
+    var reader = new FileReader();
 
+    reader.onloadstart = function(evt) {};
+    reader.onprogress = function(evt) {};
+    reader.onerror = function(evt) {};
+
+    reader.onloadend = function(evt) {
+        $("#listening").text("lectura hecha");
+    };
+    reader.readAsText(readerDummy);
+}   
+function get_loc() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(coordenadas);
+    }else{
+        alert('Este navegador es algo antiguo, actualiza para usar el API de localización');                  }
+}
 function escribir(){
     $("#listening").text("escribiendo archivo1");
     window.requestFileSystem(cordova.file.externalRootDirectory, 0, gotFS, fail);
@@ -500,67 +614,74 @@ var onFile = function(fileEntry) {
       $("#listening").text("Se escribio el archivo");
     };
   */ 
-   
-function gotFS(fileSystem) {
-    fileSystem.root.getDirectory("DO_NOT_DELETE", 
-        {create: true, exclusive: false}, 
-        gotDirEntry, 
-        fail);
-}
-function gotDirEntry(dirEntry) {
-    dir = dirEntry;
-    dirEntry.getFile(nomArchivoTexto, 
-        {create: false, exclusive: false}, 
-        readSuccess, 
-        fileDonotexist);
-}
-function fileDonotexist(dirEntry) {
-    dir.getFile(nomArchivoTexto, 
-        {create: true, exclusive: false}, 
-        gotFileEntry, 
-        fail);
-}
-function gotFileEntry(fileEntryWrite) {
-    $("#listening").text("gotFileEntry");
-    fileEntryWrite.createWriter(gotFileWriter, fail);
-}
-function gotFileWriter(writer) {
-    $("#listening").text("gotFileWriter");
-    writer.onerror = function(evt) {
-    };
-    writer.write("algo");
-    writer.onwriteend = function(evt) {
-        dir.getFile(nomArchivoTexto, 
-            {create: false, exclusive: false}, 
-            readSuccess, 
-            fail);
-    };
-}
-function readSuccess(fileE) {
-    fileE.file(readAsText, fail);
-    $("#listening").text("readSuccess");
-}
-function fail(error) {
-    $("#listening").text("error nume: "+ error.code);
-}
-function readAsText(readerDummy) {
-    var reader = new FileReader();
+ //////FUNCIONES DE MAPA//////////////
+function mostrarMapa(){
+    var posicion = objPositionAct;
+    var mapurl="img/logo.png";
+    var ubicacion=document.getElementById('map');
 
-    reader.onloadstart = function(evt) {};
-    reader.onprogress = function(evt) {};
-    reader.onerror = function(evt) {};
+        if ((posicion===null)||(posicion===undefined)){
+            // SE TOMA EL VALOR ACTUAL DE LA POSICION 
+            mapurl='http://maps.google.com/maps/api/staticmap?center='+
+            objPositionAct.coords.latitude+','+objPositionAct.coords.longitude+
+            '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+objPositionAct.coords.latitude+
+            ','+objPositionAct.coords.longitude;
+            
+        }
+        else{
+            mapurl='http://maps.google.com/maps/api/staticmap?center='+
+            posicion.coords.latitude+','+posicion.coords.longitude+
+            '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+posicion.coords.latitude+
+            ','+posicion.coords.longitude;
+        }
+    //para toglear entre mostrar mapa y datos
+    if (bMostrandoMapa){
+        $("#info").show();
+        $("#btnVerMapa").buttonMarkup({theme: 'b'});
+        $("#btnVerMapa").text("Ver Mapa");
+    }
+    else{
+        $("#info").hide();
+        $("#btnVerMapa").buttonMarkup({theme: 'a'});
+        $("#btnVerMapa").text("Ver Info");
+        ubicacion.innerHTML='<img src="'+mapurl+'">';
+    }
+    bMostrandoMapa=!bMostrandoMapa;
 
-    reader.onloadend = function(evt) {
-        $("#listening").text("lectura hecha");
-    };
-    reader.readAsText(readerDummy);
-}   
 
-function get_loc() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(coordenadas);
-    }else{
-        alert('Este navegador es algo antiguo, actualiza para usar el API de localización');                  }
+}
+function mostrarMapaGPSExt(){
+    var mapurl="img/logo.png";
+    var ubicacion=document.getElementById('map');
+    //var slat,slon ;
+    
+    sPosIni=extraerDato(aLin[0],"lat")+extraerDato(aLin[0],"lon");
+    sPosAct=extraerDato(aLin[aLin.length-1],"lat")+extraerDato(aLin[aLin.length-1],"lon");
+    
+    //para toglear entre mostrar mapa y datos
+    if (bMostrandoMapa){
+        $("#info").show();
+        $("#btnVerMapa").buttonMarkup({theme: 'b'});
+        $("#btnVerMapa").text("Ver Mapa");
+    }
+    else{
+        $("#info").hide();
+        $("#btnVerMapa").buttonMarkup({theme: 'a'});
+        $("#btnVerMapa").text("Ver Info");
+        ubicacion.innerHTML='<img src="'+mapurl+'">';
+    }
+    bMostrandoMapa=!bMostrandoMapa;
+
+    var slat,slon;
+    slat=extraerDato(sPosAct,"lat");
+    slon=extraerDato(sPosAct,"lon");
+    if ((slat.lenght+slon.lenght)>8){
+        // SE TOMA EL VALOR ACTUAL DE LA POSICION 
+        mapurl='http://maps.google.com/maps/api/staticmap?center='+
+        slat+','+slon+
+        '&zoom=12&size='+ventana_ancho.toString()+'x'+ventana_alto.toString()+'&sensor=false&markers='+
+        slat+','+slon;
+    }
 }
 
 function coordenadas(position) {
@@ -570,7 +691,6 @@ function coordenadas(position) {
       map.src = "http://maps.google.com/maps/api/staticmap?center=" + lat + "," 
               + lon + "&amp;zoom=15&amp;size=300x300&amp;markers=color:red|label:A|" + lat + "," + lon + "&amp;sensor=false";
 }
-
 function iniciarMapa(){
     if ("geolocation" in navigator){ //check Geolocation available 
         //things to do
@@ -578,7 +698,7 @@ function iniciarMapa(){
         $("#geolocation").text("No existe geolocation");
     }
 }
-
+///PENDIENTES DE USAR/////
 function onSuccess(position) {
     //var element = document.getElementById('geolocation');
     objPositionIni=position;
@@ -589,7 +709,6 @@ function onSuccess(position) {
      */
     bPriVez=true;
     }
-
         // onError Callback receives a PositionError object
         //
 function onError(error) {
@@ -598,131 +717,9 @@ function onError(error) {
      $("#geolocation").text(errortmp);
 }
 
-
-    function leerPuerto(){
-
-       abrirPuertoYleerBuffer();
-       //recibirDatoSerial("194  15:12:10.2$GPRMC,200414.000,A,0438.1299,N,07408.9062,W,0.00,285.72,131117,,,A*7B50  15:04:14.383  37$GPRMC,200414.000,A,0438.1400,N,07408.9300,W,0.00,285.72,131117,,,A*7B50  15:04:14.383  37$PGLL,,,,,201210.092,V,N*71");
-    }
-    
-
-    function uintToString(uintArray) {
-        var encodedString = String.fromCharCode.apply(null, uintArray),
-            decodedString = decodeURIComponent(escape(encodedString));
-        return decodedString;
-    }
-    
-    function recibirDatoSerial(sDatoSerial){
-        var sLetra="";
-        
-        //$("#debug1").text(sDatoSerial);
-        
-        for (i=0;i < sDatoSerial.length;i++){
-            sLetra = sDatoSerial.substr(i,1);
-            if (sLetra ==="$"){
-                if (fLinea){
-                    if (sLin.substr(0,6)==="$GPRMC" && sLin.substr(18,1)==="A"){//Solo agrega al array los Recommended Minimum position data (including position, velocity and time).
-                        $("#debug2").text(sLin);
-                        if (aLin.length===0){
-                            sPosIni=sLin;
-                            sPosAct=sLin;
-                            sPosAnt=sLin;
-                            aLin.push(sLin);//se agrega el primer registro
-                        }
-                        else if (aLin.length>0){//indica que ya hay mas de un dato GPRMC
-                            sPosIni=aLin[0];
-                            sPosAct=sLin;
-                            sPosAnt=aLin[aLin.length-1];
-                            sLatAnt = extraerDato(sPosAnt,"lat");
-                            sLonAnt = extraerDato(aLin[aLin.length-1],"lon");
-                            sLatAct = extraerDato(sLin,"lat");
-                            sLonAct = extraerDato(sLin,"lon");
-                            losMetros = getMetros(Number(sLatAnt),Number(sLonAnt),Number(sLatAct),Number(sLonAct));
-                            if (losMetros>metMinRegPos){
-                                aLin.push(sLin);
-                                Unidades=Unidades+(losMetros/100);
-                                lMovido=true;
-                            }
-                            mostrarTodo();
-                        }
-                        bEnganchado = true;
-                    }
-                }
-                sLin="$";
-                fLinea=true;
-                
-            }
-            else{
-                sLin = sLin + sLetra;
-            }
-            //$("#debug2").text(sLin);
-        }
-    }
-    
-    function convertirGraaDec(sGradosMinutos, bLatLon){
-        /*
-         * 
-         * (23° 08' 06'' N) = (23 + (08 / 60) + (06 / 3600)) = 23.134999
-         */
-        var dd="";
-        var mm="";
-        //var ss="";
-        var retVal=0;
-        
-        if (bLatLon){//si es verdadeso saca Latitud ddmm.ssss
-            dd=sGradosMinutos.substr(0, 2);
-            mm=sGradosMinutos.substr(2, 7);
-            //ss=sGradosMinutos.substr(5, 4);
-        }//longitud dddmm.ssss
-        else{
-            dd=sGradosMinutos.substr(0, 3);
-            mm=sGradosMinutos.substr(3, 7);
-            //ss=sGradosMinutos.substr(6, 4);
-            
-        }
-        retVal=Number(dd)+(Number(mm)/60);
-        return retVal.toString();
-    }
-    
-    function extraerDato(sLinea,sDat){
-        //EXTRAE EL DATO Y LO FORMATEA RETORNA STRINGS
-        //$GPRMC,013732.000,A,3150.7238,N,11711.7278,E,0.00,0.00,220413,,,A*68
-        var sRetVal="";
-        aTmp=sLinea.split(",");
-        if (sDat==="lat"){
-            sRetVal=convertirGraaDec(aTmp[3],true);
-            if (aTmp[3]==="S"){
-                sRetVal="-"+sRetVal;
-            }
-        }
-        else if(sDat==="lon"){
-            sRetVal=convertirGraaDec(aTmp[5],false);
-            if (aTmp[6]==="W"){
-                sRetVal="-"+sRetVal;
-            }
-        }
-        else if(sDat==="tmp"){
-            //hhmmss.sss
-            shhmmss=aTmp[1];
-            //ddmmyyyy
-            sddmmyyyy=aTmp[9];
-            sRetVal=sddmmyyyy.substr(0,2)+"/"+sddmmyyyy.substr(2,2)+"/"+sddmmyyyy.substr(4,4);
-            sRetVal= sRetVal + " " +shhmmss.substr(0,2)+":"+shhmmss.substr(2,2)+":"+shhmmss.substr(4,2);
-        }
-        else if(sDat==="val"){
-            sRetVal=aTmp[2];
-        }
-        return sRetVal;
-    }
-    
- function obtenerTiempoRecorrido(){
-    var dIni = "";
-    var dFin = "";
-    var segs = "";
-    if (aLin.length>1){
-        dIni = new Date(extraerDato(aLin[0],"tmp"));
-        dFin = new Date(extraerDato(aLin[aLin.length-1],"tmp"));
-        segs = restarFechasEnSegs(dIni,dFin);
-    }
-    return segs;
- }
+function verBrowser(){
+    var ref = window.open('http://espaciointernet.com/trabajos/taxiterminal/mapa7.php?dirLoc=bogota&zoo=12&lat=4.6261026&lng=-74.1476059&latori=4.6261026&lngori=-74.1476059&wid=400&hei=400', '_blank', 'location=yes');
+    var myCallback = function() { alert(event.url); };
+    ref.addEventListener('loadstart', myCallback);
+    ref.removeEventListener('loadstart', myCallback);
+}
