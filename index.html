@@ -24,6 +24,15 @@
     <meta name="format-detection" content="telephone=no" />
     <meta name="msapplication-tap-highlight" content="no" />
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!--GOOGLE MAPS-->
+    <script language="JavaScript" src="js/geocoder4.js"></script>
+    <!--
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyBvnsjUSngsFEI81RZ6gmO5F0kgJ7CwYus&sensor=false"></script>
+    -->
+    <!-- <script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script> -->
+    <script type="text/javascript" src="http://maps.google.com/maps/api/js?key=AIzaSyCB1-Cr81uUqRTSi7Y0pP43gnmT8RwyPCE"></script>
+
+    <!--PHONE GAP-->
     <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
     <!--<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; connect-src 'self'; img-src 'self'; style-src 'self';" />-->
     <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: 'unsafe-inline' https://ssl.gstatic.com; connect-src 'self'; style-src 'self' 'unsafe-inline'; media-src *" />-->
@@ -100,7 +109,39 @@
         );
     }
     
-    
+//FUNCIONES DE MAPEO
+
+var map; //importante definirla fuera de la funcion initialize() para poderla usar desde otras funciones.
+    function iniMapa(sLat,sLon,iZoom) {
+        var punto = new google.maps.LatLng(sLat, sLon); //ubicación del Plaza Central de Tikal, Guatemala
+        //var punto = retLatLng(dirLoc);
+        //alert (lat);
+        var image='img/pini.png';
+        var myOptions = {
+            zoom: iZoom, //nivel de zoom para poder ver de cerca.
+            center: punto,
+            //mapTypeId: google.maps.MapTypeId.SATELLITE //Tipo de mapa inicial, satélite para ver las pirámides
+            mapTypeId: google.maps.MapTypeId.ROADMAP,
+            //mapTypeId: google.maps.MapTypeId.HYBRID
+            icon: image
+        };
+        map = new google.maps.Map(document.getElementById("map_canvas"), myOptions);
+    }
+    function crearMarca(sLat,sLon) {
+        var punto = new google.maps.LatLng(sLat, sLon); 
+        //Hacer un marca
+        var image = 'img/car.png';
+        var marker = new google.maps.Marker({
+        position: punto, 
+        map: map,
+        //animation: google.maps.Animation.DROP,
+        animation: google.maps.Animation.BOUNCE,
+        icon: image,
+        title: "Aca estas"
+        }); 
+    }
+
+
     </script>
 </head>
 
@@ -109,6 +150,14 @@
         $(document).ready(function($){
             ventana_ancho = $(window).width();
             ventana_alto = $(window).height();
+            $("#map_canvas").width(ventana_ancho);
+            $("#map_canvas").height(ventana_alto);
+            $( "#verMapa" ).click(function() {
+                bMostrarMapa = $("#verMapa").is(':checked');
+            });
+            $( "#GPSExt" ).click(function() {
+                bGpsExterno = $("#GPSExt").is(':checked');
+            });
         }); 
     </script>
     <div class="app">
@@ -116,7 +165,7 @@
             <div id="encabezado" data-role="header" data-position="fixed" >
                 <a href="javascript:obtener();" class="ui-btn ui-corner-all ui-shadow ui-icon-home ui-btn-icon-left" id="btnComenzar">Comenzar</a>
                 <h1>espaciointernet spectrum</h1>
-                <a href="javascript:mostrarMapa();" class="ui-btn ui-corner-all ui-shadow ui-icon-search ui-btn-icon-left" id="btnVerMapa">Ver Mapa</a>
+                <a href="javascript:crearMarca();" class="ui-btn ui-corner-all ui-shadow ui-icon-search ui-btn-icon-left" id="btnVerMapa">Ver Mapa</a>
             </div>
             <div id="deviceready" style="display: none">
 
@@ -148,7 +197,24 @@
                 <p id="debug1"> Debug 1</p>
                 <p id="debug2"> Debug 2</p>
             </div>
-            <div id="map"></div>
+             <div id="map"></div>
+           <table>
+             <tr>
+                <div id="map_canvas" style="height:'200px';width:'200px';background-color:'blue'"></div></td>
+             </tr>
+             <tr bgcolor=#0000FF>
+               <td><div id="dir"></div></td>
+               <td><div id="zoo">12</div></td>
+               <td><div id="lat">4.23</div></td>
+               <td><div id="lon">-74.23</div></td>
+             </tr>
+             <tr>
+               <td><div id="latori">4.23</div></td>
+               <td><div id="lonori">-74.23</div></td>
+               <td><div id="dis">&nbsp;</div></td>
+               <td><div id="dur">&nbsp;</div></td>
+             </tr> 
+           </table>
     
             <div data-role="footer" data-position="fixed">
                 <div class="ui-grid-c">
