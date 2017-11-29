@@ -33,8 +33,8 @@ var valorUnidad=83;
 var bMostrandoMapa=false;
 var averageProm;
 
-var metMinRegPos=151;//metros minimos para registro de cambio de posicion depuracion phonegap
-//var metMinRegPos=10;
+//var metMinRegPos=151;//metros minimos para registro de cambio de posicion depuracion phonegap
+var metMinRegPos=10;
 
 var bPriVez=false;//para saber si ya se obtuvo la primer posicion
 
